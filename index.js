@@ -140,7 +140,17 @@ app.get('/auth/logout', requireAuth, (req, res) => {
 });
 
 app.use(express.static(__dirname));
+
+const pages = ['dashboard', 'members', 'roles', 'logs', 'settings'];
+pages.forEach(page => {
+  app.get(`/${page}`, (req, res) => {
+    if (!req.session.user) return res.redirect('/');
+    res.sendFile(__dirname + `/${page}.html`);
+  });
+});
+
 app.get('/', (req, res) => {
+  if (req.session.user) return res.redirect('/dashboard');
   res.sendFile(__dirname + '/index.html');
 });
 

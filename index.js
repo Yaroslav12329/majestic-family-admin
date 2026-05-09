@@ -53,8 +53,10 @@ app.get('/auth/logout', (req, res) => {
   res.json({ ok: true });
 });
 
+app.use(express.static(__dirname));
+
 app.get('/', (req, res) => {
-  res.json({ status: 'ok', message: 'Majestic Admin API работает!' });
+  res.sendFile(__dirname + '/index.html');
 });
 
 const PORT = process.env.PORT || 3000;

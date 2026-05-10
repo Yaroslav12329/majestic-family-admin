@@ -83,13 +83,6 @@ req.session.save((err) => {
   res.redirect('/dashboard');
 });
 
-    addLog('login', `Вошёл в панель`, nick);
-    res.redirect('/dashboard');
-  } catch (err) {
-    console.error(err.response?.data || err.message);
-    res.redirect('/?error=auth_failed');
-  }
-});
 
 // Текущий пользователь
 app.get('/auth/me', requireAuth, async (req, res) => {

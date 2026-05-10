@@ -11,8 +11,21 @@ app.use((req, res, next) => {
   res.setHeader('Expires', '0');
   next();
 });
-app.use(cors({ origin: '*', credentials: true }));
-app.use(session({ secret: 'majestic-secret-key', resave: false, saveUninitialized: false }));
+app.use(cors({
+  origin: 'https://majestic-family-admin.onrender.com',
+  credentials: true
+}));
+app.use(session({
+  secret: 'majestic-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: true,
+    httpOnly: true,
+    sameSite: 'none',
+    maxAge: 24 * 60 * 60 * 1000
+  }
+}));
 
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;

@@ -143,6 +143,10 @@ app.get('/auth/logout', requireAuth, (req, res) => {
 const path = require('path');
 const fs = require('fs');
 
+app.get('/test', (req, res) => {
+  res.send('Сервер работает! __dirname: ' + __dirname);
+});
+
 const pages = ['dashboard', 'members', 'roles', 'logs', 'settings'];
 pages.forEach(page => {
   app.get(`/${page}`, (req, res) => {

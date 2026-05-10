@@ -125,22 +125,29 @@ function hex(c) { return c ? '#' + c.toString(16).padStart(6,'0') : '#5865F2'; }
 function initials(n) { return (n||'?').slice(0,2).toUpperCase(); }
 
 async function init() {
+  // Сохраняем токен из URL в localStorage
+  const params = new URLSearchParams(window.location.search);
+  const urlToken = params.get('token');
+  if (urlToken) {
+    localStorage.setItem('authToken', urlToken);
+    window.history.replaceState({}, '', '/panel');
+  }
+
+  const token = localStorage.getItem('authToken');
+  if (!token) { window.location.href = '/'; return; }
+
   try {
-    const res = await fetch(`${API}/auth/me`, { credentials: 'include' });
-    if (!res.ok) { window.location.href = '/'; return; }
-    const user = await res.json();
-    const nick = user.nick || user.username;
-    const topColor = user.topRole ? hex(user.topRole.color) : '#5865F2';
-    const topName = user.topRole ? user.topRole.name : 'Участник';
-    document.getElementById('welcome-nick').textContent = nick;
-    document.getElementById('sb-nick').textContent = nick;
-    const rb = document.getElementById('sb-role');
-    rb.textContent = topName; rb.style.background = topColor+'33'; rb.style.color = topColor;
-    const av = document.getElementById('sb-avatar');
-    av.innerHTML = user.avatar ? `<img src="${user.avatar}" alt="${nick}">` : initials(nick);
-    av.style.borderColor = topColor+'66';
-    loadStats(); loadLogs();
-  } catch { window.location.href = '/'; }
+    const res = await fetch(`${API}/auth/me?token=${token}`);
+    if (res.ok) {
+      const user = await res.json();
+      loadDashboard(user);
+    } else {
+      localStorage.removeItem('authToken');
+      window.location.href = '/';
+    }
+  } catch {
+    window.location.href = '/';
+  }
 }
 
 async function loadStats() {

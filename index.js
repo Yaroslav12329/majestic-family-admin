@@ -77,7 +77,7 @@ app.get('/auth/callback', async (req, res) => {
     };
 
     addLog('login', `Вошёл в панель`, nick);
-    res.redirect(process.env.FRONTEND_URL || '/');
+    res.redirect('/dashboard');
   } catch (err) {
     console.error(err.response?.data || err.message);
     res.redirect('/?error=auth_failed');

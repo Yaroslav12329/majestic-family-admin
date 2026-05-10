@@ -69,7 +69,7 @@ app.get('/auth/callback', async (req, res) => {
     const nick = memberRes.data.nick || userRes.data.username;
     const roles = memberRes.data.roles || [];
 
-    req.session.user = {
+req.session.user = {
       id: userRes.data.id,
       username: userRes.data.username,
       nick,
@@ -78,11 +78,12 @@ app.get('/auth/callback', async (req, res) => {
     };
 
     addLog('login', 'Вошёл в панель', nick);
-
-    req.session.save((err) => {
-      if (err) console.error('Session save error:', err);
-      res.redirect('/dashboard');
-    });
+    res.redirect('/dashboard');
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    res.redirect('/?error=auth_failed');
+  }
+});
   } catch (err) {
     console.error(err.response?.data || err.message);
     res.redirect('/?error=auth_failed');

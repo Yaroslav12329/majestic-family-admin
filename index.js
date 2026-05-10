@@ -1,28 +1,18 @@
 const express = require('express');
-const session = require('express-session');
 const axios = require('axios');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const app = express();
 app.use(express.json());
+app.use(cors({ origin: true, credentials: true }));
 
 app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
   next();
 });
-
-app.use(cors({ origin: true, credentials: true }));
-
-app.use(session({
-  secret: 'majestic-secret-key',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: true, httpOnly: true, sameSite: 'none', maxAge: 24 * 60 * 60 * 1000 }
-}));
 
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
@@ -30,14 +20,19 @@ const GUILD_ID = process.env.GUILD_ID;
 const REDIRECT_URI = process.env.REDIRECT_URI;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
+// Хранилище токенов в памяти
+const tokens = {};
 const logs = [];
+
 function addLog(type, message, user = 'System') {
   logs.unshift({ type, message, user, time: new Date().toISOString() });
   if (logs.length > 100) logs.pop();
 }
 
 function requireAuth(req, res, next) {
-  if (!req.session.user) return res.status(401).json({ error: 'Не авторизован' });
+  const token = req.headers['x-auth-token'] || req.query.token;
+  if (!token || !tokens[token]) return res.status(401).json({ error: 'Не авторизован' });
+  req.user = tokens[token];
   next();
 }
 
@@ -48,7 +43,7 @@ app.get('/auth/login', (req, res) => {
 
 app.get('/auth/callback', async (req, res) => {
   const code = req.query.code;
-  if (!code) return res.status(400).json({ error: 'Нет кода' });
+  if (!code) return res.redirect('/?error=no_code');
   try {
     const tokenRes = await axios.post('https://discord.com/api/oauth2/token',
       new URLSearchParams({ client_id: CLIENT_ID, client_secret: CLIENT_SECRET, grant_type: 'authorization_code', code, redirect_uri: REDIRECT_URI }),
@@ -61,7 +56,9 @@ app.get('/auth/callback', async (req, res) => {
     const nick = memberRes.data.nick || userRes.data.username;
     const roles = memberRes.data.roles || [];
 
-    req.session.user = {
+    // Генерируем уникальный токен
+    const authToken = crypto.randomBytes(32).toString('hex');
+    tokens[authToken] = {
       id: userRes.data.id,
       username: userRes.data.username,
       nick,
@@ -69,10 +66,14 @@ app.get('/auth/callback', async (req, res) => {
       roles
     };
 
+    // Удаляем токен через 24 часа
+    setTimeout(() => delete tokens[authToken], 24 * 60 * 60 * 1000);
+
     addLog('login', 'Вошёл в панель', nick);
-    res.redirect('/dashboard');
+    console.log('Auth success for:', nick, 'token:', authToken.slice(0, 8) + '...');
+    res.redirect('/dashboard?token=' + authToken);
   } catch (err) {
-    console.error(err.response?.data || err.message);
+    console.error('Auth error:', err.response?.data || err.message);
     res.redirect('/?error=auth_failed');
   }
 });
@@ -83,12 +84,12 @@ app.get('/auth/me', requireAuth, async (req, res) => {
       headers: { Authorization: `Bot ${BOT_TOKEN}` }
     });
     const allRoles = guildRes.data;
-    const userRoleIds = req.session.user.roles;
+    const userRoleIds = req.user.roles;
     const userRoles = allRoles.filter(r => userRoleIds.includes(r.id));
     const topRole = userRoles.sort((a, b) => b.position - a.position)[0];
-    res.json({ ...req.session.user, topRole: topRole ? { name: topRole.name, color: topRole.color } : null });
+    res.json({ ...req.user, topRole: topRole ? { name: topRole.name, color: topRole.color } : null });
   } catch {
-    res.json(req.session.user);
+    res.json(req.user);
   }
 });
 
@@ -135,13 +136,16 @@ app.get('/api/logs', requireAuth, (req, res) => {
 });
 
 app.get('/auth/logout', (req, res) => {
-  if (req.session.user) addLog('logout', 'Вышел из панели', req.session.user.nick);
-  req.session.destroy();
+  const token = req.headers['x-auth-token'] || req.query.token;
+  if (token && tokens[token]) {
+    addLog('logout', 'Вышел из панели', tokens[token].nick);
+    delete tokens[token];
+  }
   res.json({ ok: true });
 });
 
 app.get('/test', (req, res) => {
-  res.send('Сервер работает! session: ' + JSON.stringify(req.session.user));
+  res.send('Сервер работает! Токенов в памяти: ' + Object.keys(tokens).length);
 });
 
 app.get('/dashboard', (req, res) => {
@@ -149,27 +153,22 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get('/members', (req, res) => {
-  if (!req.session.user) return res.redirect('/');
   res.sendFile(path.join(__dirname, 'members.html'));
 });
 
 app.get('/roles', (req, res) => {
-  if (!req.session.user) return res.redirect('/');
   res.sendFile(path.join(__dirname, 'roles.html'));
 });
 
 app.get('/logs', (req, res) => {
-  if (!req.session.user) return res.redirect('/');
   res.sendFile(path.join(__dirname, 'logs.html'));
 });
 
 app.get('/settings', (req, res) => {
-  if (!req.session.user) return res.redirect('/');
   res.sendFile(path.join(__dirname, 'settings.html'));
 });
 
 app.get('/', (req, res) => {
-  if (req.session.user) return res.redirect('/dashboard');
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 

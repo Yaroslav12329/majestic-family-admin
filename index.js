@@ -15,21 +15,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
+app.use(cors({ origin: true, credentials: true }));
 
 app.use(session({
   secret: 'majestic-secret-key',
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    secure: true,
-    httpOnly: true,
-    sameSite: 'none',
-    maxAge: 24 * 60 * 60 * 1000
-  }
+  cookie: { secure: true, httpOnly: true, sameSite: 'none', maxAge: 24 * 60 * 60 * 1000 }
 }));
 
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -69,7 +61,7 @@ app.get('/auth/callback', async (req, res) => {
     const nick = memberRes.data.nick || userRes.data.username;
     const roles = memberRes.data.roles || [];
 
-req.session.user = {
+    req.session.user = {
       id: userRes.data.id,
       username: userRes.data.username,
       nick,
@@ -79,11 +71,6 @@ req.session.user = {
 
     addLog('login', 'Вошёл в панель', nick);
     res.redirect('/dashboard');
-  } catch (err) {
-    console.error(err.response?.data || err.message);
-    res.redirect('/?error=auth_failed');
-  }
-});
   } catch (err) {
     console.error(err.response?.data || err.message);
     res.redirect('/?error=auth_failed');
@@ -148,19 +135,16 @@ app.get('/api/logs', requireAuth, (req, res) => {
 });
 
 app.get('/auth/logout', (req, res) => {
-  if (req.session.user) {
-    addLog('logout', 'Вышел из панели', req.session.user.nick);
-  }
+  if (req.session.user) addLog('logout', 'Вышел из панели', req.session.user.nick);
   req.session.destroy();
   res.json({ ok: true });
 });
 
 app.get('/test', (req, res) => {
-  res.send('Сервер работает! __dirname: ' + __dirname);
+  res.send('Сервер работает! session: ' + JSON.stringify(req.session.user));
 });
 
 app.get('/dashboard', (req, res) => {
-  
   res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
 

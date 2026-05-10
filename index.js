@@ -199,6 +199,9 @@ app.get('/', (req, res) => {
   }
   res.sendFile(filePath);
 });
+app.use((req, res) => {
+  res.status(404).send('404 - страница не найдена: ' + req.url);
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -8,7 +8,7 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root { --discord: #5865F2; --bg: #0d0e10; --bg2: #131416; --bg3: #1a1b1e; --bg4: #222327; --border: rgba(255,255,255,0.07); --text: #f0f0f2; --muted: #6b6d78; --sw: 260px; }
-  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
   #sidebar { position: fixed; top: 0; left: 0; width: var(--sw); height: 100vh; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 100; transition: transform .3s cubic-bezier(.4,0,.2,1); }
   #sidebar.collapsed { transform: translateX(calc(-1 * var(--sw))); }
   .sb-header { padding: 22px 18px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
@@ -18,12 +18,11 @@
   .sb-sub { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
   .sb-nav { flex: 1; padding: 14px 10px; overflow-y: auto; }
   .nav-label { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; padding: 10px 10px 5px; font-family: 'JetBrains Mono', monospace; }
-  .nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 2px; transition: background .15s, color .15s; text-decoration: none; }
+  .nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 2px; transition: background .15s, color .15s; text-decoration: none; }
   .nav-item:hover { background: var(--bg4); color: var(--text); }
   .nav-item.active { background: rgba(88,101,242,0.15); color: #818cf8; }
   .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: .75; }
   .nav-item.active svg { opacity: 1; }
-  .nav-badge { margin-left: auto; background: var(--discord); color: white; font-size: 10px; font-weight: 700; border-radius: 20px; padding: 2px 7px; font-family: 'JetBrains Mono', monospace; }
   .sb-user { padding: 14px 16px; border-top: 1px solid var(--border); background: var(--bg3); display: flex; align-items: center; gap: 11px; }
   .u-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--discord); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: white; flex-shrink: 0; border: 2px solid rgba(88,101,242,.35); overflow: hidden; }
   .u-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -33,7 +32,7 @@
   .u-logout { background: none; border: none; color: var(--muted); cursor: pointer; padding: 6px; border-radius: 8px; transition: background .15s, color .15s; display: flex; }
   .u-logout:hover { background: var(--bg4); color: var(--text); }
   .u-logout svg { width: 16px; height: 16px; }
-  #main { margin-left: var(--sw); transition: margin-left .3s cubic-bezier(.4,0,.2,1); min-height: 100vh; flex: 1; }
+  #main { margin-left: var(--sw); transition: margin-left .3s cubic-bezier(.4,0,.2,1); min-height: 100vh; }
   #main.expanded { margin-left: 0; }
   .topbar { display: flex; align-items: center; gap: 14px; padding: 18px 28px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 50; }
   .toggle-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s; flex-shrink: 0; }
@@ -48,7 +47,7 @@
   .welcome h2 span { color: #818cf8; }
   .welcome p { font-size: 13px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 26px; }
-  .stat { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 20px; cursor: pointer; transition: border-color .15s; text-decoration: none; display: block; }
+  .stat { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 20px; cursor: pointer; text-decoration: none; display: block; transition: border-color .15s; }
   .stat:hover { border-color: rgba(88,101,242,.3); }
   .stat-l { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 7px; }
   .stat-v { font-size: 28px; font-weight: 800; letter-spacing: -1px; color: var(--text); }
@@ -64,9 +63,9 @@
   .log-msg { color: var(--muted); flex: 1; }
   .log-time { color: var(--muted); font-size: 11px; opacity: .6; }
   .empty-state { text-align: center; padding: 48px; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
-  #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 90; }
-  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--discord); border-radius: 50%; animation: spin .8s linear infinite; margin: 48px auto; }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--discord); border-radius: 50%; animation: spin .8s linear infinite; margin: 48px auto; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 90; }
 </style>
 </head>
 <body>
@@ -78,12 +77,12 @@
   </div>
   <div class="sb-nav">
     <div class="nav-label">Главное</div>
-    <a class="nav-item active" href="/dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
-    <a class="nav-item" href="/members"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Участники</a>
-    <a class="nav-item" href="/roles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Роли</a>
-    <a class="nav-item" href="/logs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Логи</a>
+    <a class="nav-item active" href="/panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Дашборд</a>
+    <a class="nav-item" href="/panel/members"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Участники</a>
+    <a class="nav-item" href="/panel/roles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Роли</a>
+    <a class="nav-item" href="/panel/logs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Логи</a>
     <div class="nav-label" style="margin-top:8px;">Система</div>
-    <a class="nav-item" href="/settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Настройки</a>
+    <a class="nav-item" href="/panel/settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Настройки</a>
   </div>
   <div class="sb-user">
     <div class="u-avatar" id="sb-avatar">?</div>
@@ -94,7 +93,6 @@
     <button class="u-logout" onclick="logout()" title="Выйти"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
   </div>
 </nav>
-
 <div id="main">
   <div class="topbar">
     <button class="toggle-btn" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
@@ -107,40 +105,39 @@
       <p>// добро пожаловать в административную панель · Family Server</p>
     </div>
     <div class="stats">
-      <a class="stat" href="/members"><div class="stat-l">Участников</div><div class="stat-v" id="stat-members">—</div><div class="stat-s">на сервере</div></a>
-      <a class="stat" href="/roles"><div class="stat-l">Ролей</div><div class="stat-v" id="stat-roles">—</div><div class="stat-s">на сервере</div></a>
+      <a class="stat" href="/panel/members"><div class="stat-l">Участников</div><div class="stat-v" id="stat-members">—</div><div class="stat-s">на сервере</div></a>
+      <a class="stat" href="/panel/roles"><div class="stat-l">Ролей</div><div class="stat-v" id="stat-roles">—</div><div class="stat-s">на сервере</div></a>
       <div class="stat"><div class="stat-l">Статус</div><div class="stat-v" style="font-size:18px;color:#3ba55c;">Online</div><div class="stat-s">сервер активен</div></div>
-      <a class="stat" href="/logs"><div class="stat-l">Логов</div><div class="stat-v" id="stat-logs">0</div><div class="stat-s">за сессию</div></a>
+      <a class="stat" href="/panel/logs"><div class="stat-l">Логов</div><div class="stat-v" id="stat-logs">0</div><div class="stat-s">за сессию</div></a>
     </div>
     <div class="section-title">// последние события</div>
     <div class="log-list" id="dash-logs"><div class="spinner"></div></div>
   </div>
 </div>
-
 <script>
-const API = 'https://majestic-family-admin.onrender.com';
+const API = 'https://majestic-family-admin-u0ze.onrender.com';
 let sidebarOpen = true;
 
 function hex(c) { return c ? '#' + c.toString(16).padStart(6,'0') : '#5865F2'; }
 function initials(n) { return (n||'?').slice(0,2).toUpperCase(); }
+function getToken() { return localStorage.getItem('authToken'); }
 
 async function init() {
-  // Сохраняем токен из URL в localStorage
   const params = new URLSearchParams(window.location.search);
   const urlToken = params.get('token');
   if (urlToken) {
     localStorage.setItem('authToken', urlToken);
     window.history.replaceState({}, '', '/panel');
   }
-
-  const token = localStorage.getItem('authToken');
+  const token = getToken();
   if (!token) { window.location.href = '/'; return; }
-
   try {
     const res = await fetch(`${API}/auth/me?token=${token}`);
     if (res.ok) {
       const user = await res.json();
-      loadDashboard(user);
+      renderUser(user);
+      loadStats();
+      loadLogs();
     } else {
       localStorage.removeItem('authToken');
       window.location.href = '/';
@@ -150,11 +147,25 @@ async function init() {
   }
 }
 
+function renderUser(user) {
+  const nick = user.nick || user.username;
+  const topColor = user.topRole ? hex(user.topRole.color) : '#5865F2';
+  const topName = user.topRole ? user.topRole.name : 'Участник';
+  document.getElementById('welcome-nick').textContent = nick;
+  document.getElementById('sb-nick').textContent = nick;
+  const rb = document.getElementById('sb-role');
+  rb.textContent = topName; rb.style.background = topColor+'33'; rb.style.color = topColor;
+  const av = document.getElementById('sb-avatar');
+  av.innerHTML = user.avatar ? `<img src="${user.avatar}" alt="${nick}">` : initials(nick);
+  av.style.borderColor = topColor+'66';
+}
+
 async function loadStats() {
+  const token = getToken();
   try {
     const [mRes, rRes] = await Promise.all([
-      fetch(`${API}/api/members`, { credentials: 'include' }),
-      fetch(`${API}/api/roles`, { credentials: 'include' })
+      fetch(`${API}/api/members?token=${token}`),
+      fetch(`${API}/api/roles?token=${token}`)
     ]);
     if (mRes.ok) { const m = await mRes.json(); document.getElementById('stat-members').textContent = m.length; }
     if (rRes.ok) { const r = await rRes.json(); document.getElementById('stat-roles').textContent = r.filter(x=>x.name!=='@everyone').length; }
@@ -162,8 +173,9 @@ async function loadStats() {
 }
 
 async function loadLogs() {
+  const token = getToken();
   try {
-    const res = await fetch(`${API}/api/logs`, { credentials: 'include' });
+    const res = await fetch(`${API}/api/logs?token=${token}`);
     if (!res.ok) return;
     const logs = await res.json();
     document.getElementById('stat-logs').textContent = logs.length;
@@ -177,7 +189,9 @@ async function loadLogs() {
 }
 
 async function logout() {
-  await fetch(`${API}/auth/logout`, { credentials: 'include' });
+  const token = getToken();
+  if (token) await fetch(`${API}/auth/logout?token=${token}`);
+  localStorage.removeItem('authToken');
   window.location.href = '/';
 }
 

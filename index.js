@@ -2,19 +2,24 @@ const express = require('express');
 const session = require('express-session');
 const axios = require('axios');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(express.json());
+
 app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
   next();
 });
+
 app.use(cors({
-  origin: 'https://majestic-family-admin.onrender.com',
+  origin: true,
   credentials: true
 }));
+
 app.use(session({
   secret: 'majestic-secret-key',
   resave: false,
@@ -33,26 +38,22 @@ const GUILD_ID = process.env.GUILD_ID;
 const REDIRECT_URI = process.env.REDIRECT_URI;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
-// Логи
 const logs = [];
 function addLog(type, message, user = 'System') {
   logs.unshift({ type, message, user, time: new Date().toISOString() });
   if (logs.length > 100) logs.pop();
 }
 
-// Middleware — проверка авторизации
 function requireAuth(req, res, next) {
   if (!req.session.user) return res.status(401).json({ error: 'Не авторизован' });
   next();
 }
 
-// OAuth login
 app.get('/auth/login', (req, res) => {
   const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify%20guilds.members.read`;
   res.redirect(url);
 });
 
-// OAuth callback
 app.get('/auth/callback', async (req, res) => {
   const code = req.query.code;
   if (!code) return res.status(400).json({ error: 'Нет кода' });
@@ -75,43 +76,40 @@ app.get('/auth/callback', async (req, res) => {
       avatar: userRes.data.avatar ? `https://cdn.discordapp.com/avatars/${userRes.data.id}/${userRes.data.avatar}.png` : null,
       roles
     };
-    console.log('Session saved for user:', nick);
-console.log('Session ID:', req.session.id);
-req.session.save((err) => {
-  if (err) console.error('Session save error:', err);
-  console.log('Session saved successfully');
-  res.redirect('/dashboard');
+
+    addLog('login', 'Вошёл в панель', nick);
+
+    req.session.save((err) => {
+      if (err) console.error('Session save error:', err);
+      res.redirect('/dashboard');
+    });
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    res.redirect('/?error=auth_failed');
+  }
 });
 
-
-// Текущий пользователь
 app.get('/auth/me', requireAuth, async (req, res) => {
   try {
-    // Получаем роли сервера чтобы найти имя высшей роли
     const guildRes = await axios.get(`https://discord.com/api/guilds/${GUILD_ID}/roles`, {
       headers: { Authorization: `Bot ${BOT_TOKEN}` }
     });
     const allRoles = guildRes.data;
     const userRoleIds = req.session.user.roles;
-
-    // Находим высшую роль по position
     const userRoles = allRoles.filter(r => userRoleIds.includes(r.id));
     const topRole = userRoles.sort((a, b) => b.position - a.position)[0];
-
     res.json({ ...req.session.user, topRole: topRole ? { name: topRole.name, color: topRole.color } : null });
   } catch {
     res.json(req.session.user);
   }
 });
 
-// Список участников сервера
 app.get('/api/members', requireAuth, async (req, res) => {
   try {
     const [membersRes, rolesRes] = await Promise.all([
       axios.get(`https://discord.com/api/guilds/${GUILD_ID}/members?limit=100`, { headers: { Authorization: `Bot ${BOT_TOKEN}` } }),
       axios.get(`https://discord.com/api/guilds/${GUILD_ID}/roles`, { headers: { Authorization: `Bot ${BOT_TOKEN}` } })
     ]);
-
     const allRoles = rolesRes.data;
     const members = membersRes.data.map(m => {
       const userRoles = allRoles.filter(r => m.roles.includes(r.id));
@@ -126,7 +124,6 @@ app.get('/api/members', requireAuth, async (req, res) => {
         joinedAt: m.joined_at
       };
     });
-
     res.json(members);
   } catch (err) {
     console.error(err.response?.data || err.message);
@@ -134,7 +131,6 @@ app.get('/api/members', requireAuth, async (req, res) => {
   }
 });
 
-// Список ролей сервера
 app.get('/api/roles', requireAuth, async (req, res) => {
   try {
     const rolesRes = await axios.get(`https://discord.com/api/guilds/${GUILD_ID}/roles`, {
@@ -146,85 +142,58 @@ app.get('/api/roles', requireAuth, async (req, res) => {
   }
 });
 
-// Логи
 app.get('/api/logs', requireAuth, (req, res) => {
   res.json(logs);
 });
 
-// Выход
-app.get('/auth/logout', requireAuth, (req, res) => {
-  addLog('logout', 'Вышел из панели', req.session.user.nick);
+app.get('/auth/logout', (req, res) => {
+  if (req.session.user) {
+    addLog('logout', 'Вышел из панели', req.session.user.nick);
+  }
   req.session.destroy();
   res.json({ ok: true });
 });
-
-
-const path = require('path');
-const fs = require('fs');
 
 app.get('/test', (req, res) => {
   res.send('Сервер работает! __dirname: ' + __dirname);
 });
 
-const pages = ['dashboard', 'members', 'roles', 'logs', 'settings'];
-pages.forEach(page => {
-  app.get(`/${page}`, (req, res) => {
-    if (!req.session.user) return res.redirect('/');
-    const filePath = path.join(__dirname, `${page}.html`);
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).send(`Файл не найден: ${filePath}`);
-    }
-    res.sendFile(filePath);
-  });
-});
 app.get('/dashboard', (req, res) => {
   if (!req.session.user) return res.redirect('/');
-  res.send('<h1>Dashboard работает!</h1>');
+  res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
 
 app.get('/members', (req, res) => {
   if (!req.session.user) return res.redirect('/');
-  const filePath = path.join(__dirname, 'members.html');
-  if (!fs.existsSync(filePath)) return res.status(404).send('Файл не найден: ' + filePath);
-  res.sendFile(filePath);
+  res.sendFile(path.join(__dirname, 'members.html'));
 });
 
 app.get('/roles', (req, res) => {
   if (!req.session.user) return res.redirect('/');
-  const filePath = path.join(__dirname, 'roles.html');
-  if (!fs.existsSync(filePath)) return res.status(404).send('Файл не найден: ' + filePath);
-  res.sendFile(filePath);
+  res.sendFile(path.join(__dirname, 'roles.html'));
 });
 
 app.get('/logs', (req, res) => {
   if (!req.session.user) return res.redirect('/');
-  const filePath = path.join(__dirname, 'logs.html');
-  if (!fs.existsSync(filePath)) return res.status(404).send('Файл не найден: ' + filePath);
-  res.sendFile(filePath);
+  res.sendFile(path.join(__dirname, 'logs.html'));
 });
 
 app.get('/settings', (req, res) => {
   if (!req.session.user) return res.redirect('/');
-  const filePath = path.join(__dirname, 'settings.html');
-  if (!fs.existsSync(filePath)) return res.status(404).send('Файл не найден: ' + filePath);
-  res.sendFile(filePath);
+  res.sendFile(path.join(__dirname, 'settings.html'));
 });
 
 app.get('/', (req, res) => {
   if (req.session.user) return res.redirect('/dashboard');
-  const filePath = path.join(__dirname, 'index.html');
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send(`Файл не найден: ${filePath}. __dirname: ${__dirname}`);
-  }
-  res.sendFile(filePath);
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
+
 app.use((req, res) => {
-  res.status(404).send('404 - страница не найдена: ' + req.url);
+  res.status(404).send('404 - не найдено: ' + req.url);
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}`);
-  const files = fs.readdirSync(__dirname);
-  console.log('Файлы в директории:', files.join(', '));
+  console.log('Файлы:', fs.readdirSync(__dirname).join(', '));
 });

@@ -150,7 +150,10 @@ pages.forEach(page => {
 
 app.get('/', (req, res) => {
   if (req.session.user) return res.redirect('/dashboard');
-  res.sendFile(__dirname + '/index.html');
+  const path = require('path');
+  const filePath = path.join(__dirname, 'index.html');
+  console.log('Serving file:', filePath);
+  res.sendFile(filePath);
 });
 
 const PORT = process.env.PORT || 3000;

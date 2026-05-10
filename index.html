@@ -3,344 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Majestic Admin</title>
+<title>Majestic Admin — Вход</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --discord: #5865F2;
-    --discord-h: #4752C4;
-    --bg: #0d0e10;
-    --bg2: #131416;
-    --bg3: #1a1b1e;
-    --bg4: #222327;
-    --border: rgba(255,255,255,0.07);
-    --text: #f0f0f2;
-    --muted: #6b6d78;
-    --sw: 260px;
-  }
-  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
-
-  /* LOGIN */
-  #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-  #login-screen::before {
-    content: ''; position: absolute; width: 700px; height: 700px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(88,101,242,0.12) 0%, transparent 70%);
-    top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
-  }
-  .login-box {
-    background: var(--bg2); border: 1px solid var(--border); border-radius: 20px;
-    padding: 52px 48px; width: 420px; text-align: center; position: relative; z-index: 1;
-  }
-  .login-logo {
-    width: 64px; height: 64px; background: var(--discord); border-radius: 18px;
-    margin: 0 auto 28px; display: flex; align-items: center; justify-content: center;
-  }
+  :root { --discord: #5865F2; --discord-h: #4752C4; --bg: #0d0e10; --bg2: #131416; --border: rgba(255,255,255,0.07); --text: #f0f0f2; --muted: #6b6d78; }
+  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .login-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 20px; padding: 52px 48px; width: 420px; text-align: center; }
+  .login-logo { width: 64px; height: 64px; background: var(--discord); border-radius: 18px; margin: 0 auto 28px; display: flex; align-items: center; justify-content: center; }
   .login-logo svg { width: 36px; height: 36px; fill: white; }
-  .login-box h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
-  .login-box p { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; font-family: 'JetBrains Mono', monospace; }
-  .btn-discord {
-    display: flex; align-items: center; justify-content: center; gap: 12px;
-    background: var(--discord); color: white; border: none; border-radius: 12px;
-    padding: 15px 28px; font-size: 15px; font-weight: 600; font-family: 'Syne', sans-serif;
-    cursor: pointer; width: 100%; transition: background .2s, transform .15s; text-decoration: none;
-  }
-  .btn-discord:hover { background: var(--discord-h); transform: translateY(-1px); }
-  .btn-discord svg { width: 22px; height: 22px; fill: white; flex-shrink: 0; }
-  .login-note { margin-top: 18px; font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-
-  /* LOADING */
-  #loading-screen {
-    display: none; min-height: 100vh; align-items: center; justify-content: center;
-    flex-direction: column; gap: 16px;
-  }
-  .spinner {
-    width: 40px; height: 40px; border: 3px solid var(--border);
-    border-top-color: var(--discord); border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text { font-size: 13px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-
-  /* DASHBOARD */
-  #dashboard { display: none; min-height: 100vh; }
-
-  /* SIDEBAR */
-  #sidebar {
-    position: fixed; top: 0; left: 0; width: var(--sw); height: 100vh;
-    background: var(--bg2); border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; z-index: 100;
-    transition: transform .3s cubic-bezier(.4,0,.2,1);
-  }
-  #sidebar.collapsed { transform: translateX(calc(-1 * var(--sw))); }
-  .sb-header { padding: 22px 18px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-  .sb-logo { width: 38px; height: 38px; background: var(--discord); border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .sb-logo svg { width: 22px; height: 22px; fill: white; }
-  .sb-title { font-size: 15px; font-weight: 800; letter-spacing: -.3px; line-height: 1.2; }
-  .sb-sub { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-  .sb-nav { flex: 1; padding: 14px 10px; overflow-y: auto; }
-  .nav-label { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; padding: 10px 10px 5px; font-family: 'JetBrains Mono', monospace; }
-  .nav-item { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 2px; transition: background .15s, color .15s; user-select: none; }
-  .nav-item:hover { background: var(--bg4); color: var(--text); }
-  .nav-item.active { background: rgba(88,101,242,0.15); color: #818cf8; }
-  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: .75; }
-  .nav-item.active svg { opacity: 1; }
-  .nav-badge { margin-left: auto; background: var(--discord); color: white; font-size: 10px; font-weight: 700; border-radius: 20px; padding: 2px 7px; font-family: 'JetBrains Mono', monospace; }
-
-  /* USER FOOTER */
-  .sb-user { padding: 14px 16px; border-top: 1px solid var(--border); background: var(--bg3); display: flex; align-items: center; gap: 11px; }
-  .u-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--discord); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: white; flex-shrink: 0; border: 2px solid rgba(88,101,242,.35); overflow: hidden; }
-  .u-avatar img { width: 100%; height: 100%; object-fit: cover; }
-  .u-info { flex: 1; min-width: 0; }
-  .u-nick { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .u-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #3ba55c; font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
-  .u-dot { width: 7px; height: 7px; border-radius: 50%; background: #3ba55c; flex-shrink: 0; }
-  .u-logout { background: none; border: none; color: var(--muted); cursor: pointer; padding: 6px; border-radius: 8px; transition: background .15s, color .15s; display: flex; }
-  .u-logout:hover { background: var(--bg4); color: var(--text); }
-  .u-logout svg { width: 16px; height: 16px; }
-
-  /* MAIN */
-  #main { margin-left: var(--sw); transition: margin-left .3s cubic-bezier(.4,0,.2,1); min-height: 100vh; }
-  #main.expanded { margin-left: 0; }
-  .topbar { display: flex; align-items: center; gap: 14px; padding: 18px 28px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 50; }
-  .toggle-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s; flex-shrink: 0; }
-  .toggle-btn:hover { background: var(--bg4); }
-  .toggle-btn svg { width: 18px; height: 18px; }
-  .topbar-title { font-size: 17px; font-weight: 800; letter-spacing: -.3px; }
-  .topbar-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
-  .topbar-tag { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--muted); }
-
-  .content { padding: 28px 32px; }
-  .welcome { background: linear-gradient(135deg, rgba(88,101,242,.18) 0%, rgba(88,101,242,.04) 100%); border: 1px solid rgba(88,101,242,.22); border-radius: 16px; padding: 26px 30px; margin-bottom: 26px; }
-  .welcome h2 { font-size: 22px; font-weight: 800; margin-bottom: 5px; }
-  .welcome h2 span { color: #818cf8; }
-  .welcome p { font-size: 13px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 26px; }
-  .stat { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
-  .stat-l { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 7px; }
-  .stat-v { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
-  .stat-s { font-size: 11px; color: #3ba55c; font-family: 'JetBrains Mono', monospace; margin-top: 3px; }
-
-  .section-title { font-size: 14px; font-weight: 700; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 14px; font-family: 'JetBrains Mono', monospace; }
-  .members-list { display: flex; flex-direction: column; gap: 8px; }
-  .member { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; }
-  .m-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; flex-shrink: 0; overflow: hidden; }
-  .m-avatar img { width: 100%; height: 100%; object-fit: cover; }
-  .m-name { font-size: 14px; font-weight: 600; }
-  .m-tag { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-  .m-role { margin-left: auto; font-size: 10px; padding: 3px 9px; border-radius: 20px; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
-  .r-admin { background: rgba(88,101,242,.2); color: #818cf8; }
-  .r-mod { background: rgba(59,165,92,.2); color: #3ba55c; }
-  .r-member { background: rgba(255,255,255,.07); color: var(--muted); }
-
-  #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 90; }
-
-  .error-box {
-    background: rgba(237,66,69,.1); border: 1px solid rgba(237,66,69,.3);
-    border-radius: 12px; padding: 16px 20px; margin-bottom: 20px;
-    font-size: 13px; color: #ed4245; font-family: 'JetBrains Mono', monospace; display: none;
-  }
+  h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+  p { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; font-family: 'JetBrains Mono', monospace; }
+  .btn { display: flex; align-items: center; justify-content: center; gap: 12px; background: var(--discord); color: white; border-radius: 12px; padding: 15px 28px; font-size: 15px; font-weight: 600; font-family: 'Syne', sans-serif; width: 100%; text-decoration: none; transition: background .2s; }
+  .btn:hover { background: var(--discord-h); }
+  .btn svg { width: 22px; height: 22px; fill: white; }
+  .note { margin-top: 18px; font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .error { background: rgba(237,66,69,.1); border: 1px solid rgba(237,66,69,.3); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #ed4245; font-family: 'JetBrains Mono', monospace; display: none; }
 </style>
 </head>
 <body>
-
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">
-      <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.031.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-    </div>
-    <h1>Majestic Admin</h1>
-    <p>Войдите через Discord чтобы получить доступ к административной панели вашего сервера</p>
-    <div class="error-box" id="error-box"></div>
-    <a class="btn-discord" href="https://majestic-family-admin.onrender.com/auth/login">
-      <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.031.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-      Войти через Discord
-    </a>
-    <p class="login-note">// только для участников сервера</p>
+<div class="login-box">
+  <div class="login-logo">
+    <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.031.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
   </div>
+  <h1>Majestic Admin</h1>
+  <p>Войдите через Discord чтобы получить доступ к панели</p>
+  <div class="error" id="err"></div>
+  <a class="btn" href="/auth/login">
+    <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.031.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+    Войти через Discord
+  </a>
+  <p class="note">// только для участников сервера</p>
 </div>
-
-<!-- LOADING -->
-<div id="loading-screen">
-  <div class="spinner"></div>
-  <div class="loading-text">// загрузка...</div>
-</div>
-
-<!-- DASHBOARD -->
-<div id="dashboard">
-  <div id="overlay" onclick="closeSidebar()"></div>
-  <nav id="sidebar">
-    <div class="sb-header">
-      <div class="sb-logo">
-        <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.031.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-      </div>
-      <div>
-        <div class="sb-title">Family Hub</div>
-        <div class="sb-sub">// admin panel</div>
-      </div>
-    </div>
-    <div class="sb-nav">
-      <div class="nav-label">Главное</div>
-      <div class="nav-item active" onclick="setPage(this,'Дашборд')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        Дашборд
-      </div>
-      <div class="nav-item" onclick="setPage(this,'Участники')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Участники
-      </div>
-      <div class="nav-item" onclick="setPage(this,'Заявки')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
-        Заявки
-      </div>
-      <div class="nav-label" style="margin-top:8px;">Управление</div>
-      <div class="nav-item" onclick="setPage(this,'Роли')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        Роли
-      </div>
-      <div class="nav-item" onclick="setPage(this,'Каналы')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
-        Каналы
-      </div>
-      <div class="nav-item" onclick="setPage(this,'Логи')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
-        Логи
-      </div>
-      <div class="nav-label" style="margin-top:8px;">Система</div>
-      <div class="nav-item" onclick="setPage(this,'Настройки')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Настройки
-      </div>
-    </div>
-    <div class="sb-user">
-      <div class="u-avatar" id="sb-avatar">?</div>
-      <div class="u-info">
-        <div class="u-nick" id="sb-nick">Загрузка...</div>
-        <div class="u-status"><div class="u-dot"></div><span>онлайн</span></div>
-      </div>
-      <button class="u-logout" onclick="logout()" title="Выйти">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </button>
-    </div>
-  </nav>
-
-  <div id="main">
-    <div class="topbar">
-      <button class="toggle-btn" onclick="toggleSidebar()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <span class="topbar-title" id="page-title">Дашборд</span>
-      <div class="topbar-right">
-        <span class="topbar-tag">Family Server</span>
-      </div>
-    </div>
-    <div class="content">
-      <div class="welcome">
-        <h2>Привет, <span id="welcome-nick">...</span> 👋</h2>
-        <p>// добро пожаловать в административную панель · Family Server</p>
-      </div>
-      <div class="stats">
-        <div class="stat"><div class="stat-l">Участников</div><div class="stat-v">—</div><div class="stat-s">Family Server</div></div>
-        <div class="stat"><div class="stat-l">Статус</div><div class="stat-v" style="font-size:18px;color:#3ba55c;">Online</div><div class="stat-s">сервер активен</div></div>
-      </div>
-      <div class="section-title">// ваш профиль</div>
-      <div class="members-list">
-        <div class="member">
-          <div class="m-avatar" id="profile-avatar" style="background:rgba(88,101,242,.2);color:#818cf8;">?</div>
-          <div>
-            <div class="m-name" id="profile-nick">—</div>
-            <div class="m-tag" id="profile-username">—</div>
-          </div>
-          <span class="m-role r-member" id="profile-role">Участник</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
-  const API = 'https://majestic-family-admin.onrender.com';
-  let sidebarOpen = true;
-
-  async function init() {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('error')) {
-      document.getElementById('error-box').style.display = 'block';
-      document.getElementById('error-box').textContent = '// ошибка: ' + params.get('error');
-      return;
-    }
-
-    show('loading-screen');
-    try {
-      const res = await fetch(`${API}/auth/me`, { credentials: 'include' });
-      if (res.ok) {
-        const user = await res.json();
-        loadDashboard(user);
-      } else {
-        show('login-screen');
-      }
-    } catch {
-      show('login-screen');
-    }
+  const p = new URLSearchParams(window.location.search);
+  if (p.get('error')) {
+    const e = document.getElementById('err');
+    e.style.display = 'block';
+    e.textContent = '// ошибка авторизации, попробуй снова';
   }
-
-  function loadDashboard(user) {
-    const nick = user.nick || user.username;
-    const initials = nick.slice(0, 2).toUpperCase();
-
-    document.getElementById('sb-nick').textContent = nick;
-    document.getElementById('welcome-nick').textContent = nick;
-    document.getElementById('profile-nick').textContent = nick;
-    document.getElementById('profile-username').textContent = user.username;
-
-    const avatarEl = document.getElementById('sb-avatar');
-    const profileAvatarEl = document.getElementById('profile-avatar');
-
-    if (user.avatar) {
-      avatarEl.innerHTML = `<img src="${user.avatar}" alt="${nick}">`;
-      profileAvatarEl.innerHTML = `<img src="${user.avatar}" alt="${nick}">`;
-    } else {
-      avatarEl.textContent = initials;
-      profileAvatarEl.textContent = initials;
-    }
-
-    show('dashboard');
-  }
-
-  function show(id) {
-    ['login-screen', 'loading-screen', 'dashboard'].forEach(s => {
-      document.getElementById(s).style.display = 'none';
-    });
-    document.getElementById(id).style.display = id === 'dashboard' ? 'block' : 'flex';
-  }
-
-  async function logout() {
-    await fetch(`${API}/auth/logout`, { credentials: 'include' });
-    show('login-screen');
-  }
-
-  function toggleSidebar() {
-    sidebarOpen = !sidebarOpen;
-    document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
-    document.getElementById('main').classList.toggle('expanded', !sidebarOpen);
-  }
-
-  function closeSidebar() {
-    sidebarOpen = false;
-    document.getElementById('sidebar').classList.add('collapsed');
-    document.getElementById('main').classList.add('expanded');
-    document.getElementById('overlay').style.display = 'none';
-  }
-
-  function setPage(el, title) {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('page-title').textContent = title;
-  }
-
-  init();
 </script>
 </body>
 </html>

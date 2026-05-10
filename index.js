@@ -158,6 +158,38 @@ pages.forEach(page => {
     res.sendFile(filePath);
   });
 });
+app.get('/dashboard', (req, res) => {
+  if (!req.session.user) return res.redirect('/');
+  res.send('<h1>Dashboard работает!</h1>');
+});
+
+app.get('/members', (req, res) => {
+  if (!req.session.user) return res.redirect('/');
+  const filePath = path.join(__dirname, 'members.html');
+  if (!fs.existsSync(filePath)) return res.status(404).send('Файл не найден: ' + filePath);
+  res.sendFile(filePath);
+});
+
+app.get('/roles', (req, res) => {
+  if (!req.session.user) return res.redirect('/');
+  const filePath = path.join(__dirname, 'roles.html');
+  if (!fs.existsSync(filePath)) return res.status(404).send('Файл не найден: ' + filePath);
+  res.sendFile(filePath);
+});
+
+app.get('/logs', (req, res) => {
+  if (!req.session.user) return res.redirect('/');
+  const filePath = path.join(__dirname, 'logs.html');
+  if (!fs.existsSync(filePath)) return res.status(404).send('Файл не найден: ' + filePath);
+  res.sendFile(filePath);
+});
+
+app.get('/settings', (req, res) => {
+  if (!req.session.user) return res.redirect('/');
+  const filePath = path.join(__dirname, 'settings.html');
+  if (!fs.existsSync(filePath)) return res.status(404).send('Файл не найден: ' + filePath);
+  res.sendFile(filePath);
+});
 
 app.get('/', (req, res) => {
   if (req.session.user) return res.redirect('/dashboard');

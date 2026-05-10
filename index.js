@@ -140,21 +140,33 @@ app.get('/auth/logout', requireAuth, (req, res) => {
 });
 
 
+const path = require('path');
+const fs = require('fs');
+
 const pages = ['dashboard', 'members', 'roles', 'logs', 'settings'];
 pages.forEach(page => {
   app.get(`/${page}`, (req, res) => {
     if (!req.session.user) return res.redirect('/');
-    res.sendFile(__dirname + `/${page}.html`);
+    const filePath = path.join(__dirname, `${page}.html`);
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).send(`Файл не найден: ${filePath}`);
+    }
+    res.sendFile(filePath);
   });
 });
 
 app.get('/', (req, res) => {
   if (req.session.user) return res.redirect('/dashboard');
-  const path = require('path');
   const filePath = path.join(__dirname, 'index.html');
-  console.log('Serving file:', filePath);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send(`Файл не найден: ${filePath}. __dirname: ${__dirname}`);
+  }
   res.sendFile(filePath);
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Сервер запущен на порту ${PORT}`);
+  const files = fs.readdirSync(__dirname);
+  console.log('Файлы в директории:', files.join(', '));
+});

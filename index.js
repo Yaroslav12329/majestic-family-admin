@@ -148,7 +148,7 @@ app.get('/test', (req, res) => {
   res.send('Сервер работает! Токенов в памяти: ' + Object.keys(tokens).length);
 });
 
-app.get('/dashboard', (req, res) => {
+app.get('/panel', (req, res) => {
   res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
 

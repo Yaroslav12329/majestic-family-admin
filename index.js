@@ -20,7 +20,6 @@ const GUILD_ID = process.env.GUILD_ID;
 const REDIRECT_URI = process.env.REDIRECT_URI;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
-// Хранилище токенов в памяти
 const tokens = {};
 const logs = [];
 
@@ -56,7 +55,6 @@ app.get('/auth/callback', async (req, res) => {
     const nick = memberRes.data.nick || userRes.data.username;
     const roles = memberRes.data.roles || [];
 
-    // Генерируем уникальный токен
     const authToken = crypto.randomBytes(32).toString('hex');
     tokens[authToken] = {
       id: userRes.data.id,
@@ -66,12 +64,10 @@ app.get('/auth/callback', async (req, res) => {
       roles
     };
 
-    // Удаляем токен через 24 часа
     setTimeout(() => delete tokens[authToken], 24 * 60 * 60 * 1000);
-
     addLog('login', 'Вошёл в панель', nick);
-    console.log('Auth success for:', nick, 'token:', authToken.slice(0, 8) + '...');
-    res.redirect('/dashboard?token=' + authToken);
+    console.log('Auth success for:', nick);
+    res.redirect('/panel?token=' + authToken);
   } catch (err) {
     console.error('Auth error:', err.response?.data || err.message);
     res.redirect('/?error=auth_failed');
@@ -145,26 +141,26 @@ app.get('/auth/logout', (req, res) => {
 });
 
 app.get('/test', (req, res) => {
-  res.send('Сервер работает! Токенов в памяти: ' + Object.keys(tokens).length);
+  res.send('Сервер работает! Токенов: ' + Object.keys(tokens).length);
 });
 
 app.get('/panel', (req, res) => {
   res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
 
-app.get('/members', (req, res) => {
+app.get('/panel/members', (req, res) => {
   res.sendFile(path.join(__dirname, 'members.html'));
 });
 
-app.get('/roles', (req, res) => {
+app.get('/panel/roles', (req, res) => {
   res.sendFile(path.join(__dirname, 'roles.html'));
 });
 
-app.get('/logs', (req, res) => {
+app.get('/panel/logs', (req, res) => {
   res.sendFile(path.join(__dirname, 'logs.html'));
 });
 
-app.get('/settings', (req, res) => {
+app.get('/panel/settings', (req, res) => {
   res.sendFile(path.join(__dirname, 'settings.html'));
 });
 
@@ -173,7 +169,7 @@ app.get('/', (req, res) => {
 });
 
 app.use((req, res) => {
-  res.status(404).send('404 - не найдено: ' + req.url);
+  res.status(404).send('404: ' + req.url);
 });
 
 const PORT = process.env.PORT || 3000;

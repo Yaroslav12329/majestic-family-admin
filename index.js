@@ -75,6 +75,13 @@ app.get('/auth/callback', async (req, res) => {
       avatar: userRes.data.avatar ? `https://cdn.discordapp.com/avatars/${userRes.data.id}/${userRes.data.avatar}.png` : null,
       roles
     };
+    console.log('Session saved for user:', nick);
+console.log('Session ID:', req.session.id);
+req.session.save((err) => {
+  if (err) console.error('Session save error:', err);
+  console.log('Session saved successfully');
+  res.redirect('/dashboard');
+});
 
     addLog('login', `Вошёл в панель`, nick);
     res.redirect('/dashboard');

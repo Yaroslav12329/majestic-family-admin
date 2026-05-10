@@ -139,7 +139,6 @@ app.get('/auth/logout', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-app.use(express.static(__dirname));
 
 const pages = ['dashboard', 'members', 'roles', 'logs', 'settings'];
 pages.forEach(page => {

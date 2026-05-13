@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Подать заявку — Majestic Family</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --discord: #5865F2; --bg: #0d0e10; --bg2: #131416; --bg3: #1a1b1e; --border: rgba(255,255,255,0.07); --text: #f0f0f2; --muted: #6b6d78; }
+  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+  body::before { content: ''; position: fixed; width: 800px; height: 800px; border-radius: 50%; background: radial-gradient(circle, rgba(88,101,242,0.08) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+  .form-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 20px; padding: 48px; width: 100%; max-width: 560px; position: relative; z-index: 1; }
+  .form-header { text-align: center; margin-bottom: 36px; }
+  .form-logo { width: 56px; height: 56px; background: var(--discord); border-radius: 16px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
+  .form-logo svg { width: 30px; height: 30px; fill: white; }
+  .form-header h1 { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+  .form-header p { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+  .field { margin-bottom: 20px; }
+  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
+  .field label span { color: #ed4245; margin-left: 3px; }
+  .field label .opt { color: var(--muted); font-weight: 400; margin-left: 4px; font-size: 10px; }
+  .field input, .field select, .field textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 12px 16px; font-size: 14px; font-family: 'Syne', sans-serif; outline: none; transition: border-color .15s; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(88,101,242,.5); }
+  .field input::placeholder, .field textarea::placeholder { color: var(--muted); }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .field select option { background: var(--bg3); }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+  .optional-label { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; text-align: center; margin-bottom: 20px; }
+  .btn-submit { width: 100%; background: var(--discord); color: white; border: none; border-radius: 12px; padding: 15px; font-size: 15px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; transition: background .2s, transform .15s; margin-top: 8px; }
+  .btn-submit:hover { background: #4752C4; transform: translateY(-1px); }
+  .btn-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+  .success-box { display: none; text-align: center; padding: 32px; }
+  .success-icon { font-size: 48px; margin-bottom: 16px; }
+  .success-box h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; color: #3ba55c; }
+  .success-box p { font-size: 13px; color: var(--muted); font-family: 'JetBrains Mono', monospace; line-height: 1.6; }
+  .error-msg { background: rgba(237,66,69,.1); border: 1px solid rgba(237,66,69,.3); border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #ed4245; font-family: 'JetBrains Mono', monospace; margin-bottom: 16px; display: none; }
+</style>
+</head>
+<body>
+<div class="form-box">
+  <div id="form-content">
+    <div class="form-header">
+      <div class="form-logo">
+        <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.031.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+      </div>
+      <h1>Вступить в семью</h1>
+      <p>// заполните все обязательные поля</p>
+    </div>
+    <div class="error-msg" id="error-msg"></div>
+    <div class="field">
+      <label>Имя (OOC)<span>*</span></label>
+      <input type="text" id="name" placeholder="Ваше имя вне игры">
+    </div>
+    <div class="field">
+      <label>Возраст (OOC)<span>*</span></label>
+      <input type="number" id="age" placeholder="Ваш реальный возраст" min="1" max="99">
+    </div>
+    <div class="field">
+      <label>Время на Маджестике<span>*</span></label>
+      <select id="time_on_majestic">
+        <option value="">— выберите —</option>
+        <option value="Меньше месяца">Меньше месяца</option>
+        <option value="1-3 месяца">1-3 месяца</option>
+        <option value="3-6 месяцев">3-6 месяцев</option>
+        <option value="6-12 месяцев">6-12 месяцев</option>
+        <option value="1-2 года">1-2 года</option>
+        <option value="Больше 2 лет">Больше 2 лет</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Были в других семьях?<span>*</span></label>
+      <textarea id="other_families" placeholder="Если да — напишите в каких. Если нет — напишите 'Нет'"></textarea>
+    </div>
+    <div class="field">
+      <label>Сколько часов в день играете?<span>*</span></label>
+      <select id="hours_per_day">
+        <option value="">— выберите —</option>
+        <option value="1-2 часа">1-2 часа</option>
+        <option value="2-4 часа">2-4 часа</option>
+        <option value="4-6 часов">4-6 часов</option>
+        <option value="6-8 часов">6-8 часов</option>
+        <option value="Больше 8 часов">Больше 8 часов</option>
+      </select>
+    </div>
+    <hr class="divider">
+    <div class="optional-label">// необязательное поле</div>
+    <div class="field">
+      <label>Откат стрельбы <span class="opt">(по желанию)</span></label>
+      <input type="text" id="shooting_stats" placeholder="Пример: Спешик — 0.3с, Сайга — 0.5с">
+    </div>
+    <button class="btn-submit" id="submit-btn" onclick="submit()">Отправить заявку</button>
+  </div>
+  <div class="success-box" id="success-box">
+    <div class="success-icon">✅</div>
+    <h2>Заявка отправлена!</h2>
+    <p>// ваша заявка принята и будет рассмотрена администрацией семьи в ближайшее время</p>
+  </div>
+</div>
+<script>
+const API = 'https://majestic-family-admin-u0ze.onrender.com';
+
+async function submit() {
+  const name = document.getElementById('name').value.trim();
+  const age = document.getElementById('age').value;
+  const time_on_majestic = document.getElementById('time_on_majestic').value;
+  const other_families = document.getElementById('other_families').value.trim();
+  const hours_per_day = document.getElementById('hours_per_day').value;
+  const shooting_stats = document.getElementById('shooting_stats').value.trim();
+  const errEl = document.getElementById('error-msg');
+
+  errEl.style.display = 'none';
+
+  if (!name || !age || !time_on_majestic || !other_families || !hours_per_day) {
+    errEl.style.display = 'block';
+    errEl.textContent = '// заполните все обязательные поля';
+    return;
+  }
+
+  if (age < 1 || age > 99) {
+    errEl.style.display = 'block';
+    errEl.textContent = '// укажите корректный возраст';
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Отправка...';
+
+  try {
+    const res = await fetch(`${API}/api/apply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, age: parseInt(age), time_on_majestic, other_families, hours_per_day, shooting_stats })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      document.getElementById('form-content').style.display = 'none';
+      document.getElementById('success-box').style.display = 'block';
+    } else {
+      errEl.style.display = 'block';
+      errEl.textContent = '// ' + (data.error || 'ошибка отправки');
+      btn.disabled = false;
+      btn.textContent = 'Отправить заявку';
+    }
+  } catch {
+    errEl.style.display = 'block';
+    errEl.textContent = '// ошибка соединения с сервером';
+    btn.disabled = false;
+    btn.textContent = 'Отправить заявку';
+  }
+}
+</script>
+</body>
+</html>

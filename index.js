@@ -236,6 +236,7 @@ app.get('/panel/roles', (req, res) => res.sendFile(path.join(__dirname, 'roles.h
 app.get('/panel/logs', (req, res) => res.sendFile(path.join(__dirname, 'logs.html')));
 app.get('/panel/settings', (req, res) => res.sendFile(path.join(__dirname, 'settings.html')));
 app.get('/panel/applications', (req, res) => res.sendFile(path.join(__dirname, 'applications.html')));
+app.get('/home', (req, res) => res.sendFile(path.join(__dirname, 'home.html')));
 app.get('/apply', (req, res) => res.sendFile(path.join(__dirname, 'apply.html')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 

@@ -34,14 +34,20 @@ async function initDB() {
     )
   `);
   await pool.query(`
-    CREATE TABLE IF NOT EXISTS auth_tokens (
-      token VARCHAR(64) PRIMARY KEY,
-      user_data JSONB NOT NULL,
-      created_at TIMESTAMP DEFAULT NOW(),
-      expires_at TIMESTAMP NOT NULL
+    CREATE TABLE IF NOT EXISTS applications (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      age INTEGER NOT NULL,
+      time_on_majestic VARCHAR(100) NOT NULL,
+      other_families TEXT,
+      hours_per_day VARCHAR(50) NOT NULL,
+      shooting_stats TEXT,
+      discord_id VARCHAR(30),
+      status VARCHAR(20) DEFAULT 'pending',
+      created_at TIMESTAMP DEFAULT NOW()
     )
   `);
-  await pool.query(`DELETE FROM auth_tokens WHERE expires_at < NOW()`);
+  await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS discord_id VARCHAR(30)`);
   console.log('База данных готова');
 }
 

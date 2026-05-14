@@ -9,19 +9,16 @@ const { Pool } = require('pg');
 const app = express();
 app.use(express.json());
 app.use(cors({ origin: true, credentials: true }));
-
 app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   next();
 });
 
-// База данных
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
-// Создаём таблицу заявок если не существует
 async function initDB() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS applications (
@@ -36,6 +33,15 @@ async function initDB() {
       created_at TIMESTAMP DEFAULT NOW()
     )
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS auth_tokens (
+      token VARCHAR(64) PRIMARY KEY,
+      user_data JSONB NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW(),
+      expires_at TIMESTAMP NOT NULL
+    )
+  `);
+  await pool.query(`DELETE FROM auth_tokens WHERE expires_at < NOW()`);
   console.log('База данных готова');
 }
 
@@ -47,22 +53,28 @@ const GUILD_ID = process.env.GUILD_ID;
 const REDIRECT_URI = process.env.REDIRECT_URI;
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
-const tokens = {};
 const logs = [];
-
 function addLog(type, message, user = 'System') {
   logs.unshift({ type, message, user, time: new Date().toISOString() });
   if (logs.length > 100) logs.pop();
 }
 
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const token = req.headers['x-auth-token'] || req.query.token;
-  if (!token || !tokens[token]) return res.status(401).json({ error: 'Не авторизован' });
-  req.user = tokens[token];
-  next();
+  if (!token) return res.status(401).json({ error: 'Не авторизован' });
+  try {
+    const result = await pool.query(
+      'SELECT user_data FROM auth_tokens WHERE token = $1 AND expires_at > NOW()',
+      [token]
+    );
+    if (result.rows.length === 0) return res.status(401).json({ error: 'Токен истёк' });
+    req.user = result.rows[0].user_data;
+    next();
+  } catch {
+    return res.status(401).json({ error: 'Ошибка авторизации' });
+  }
 }
 
-// OAuth
 app.get('/auth/login', (req, res) => {
   const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify%20guilds.members.read`;
   res.redirect(url);
@@ -84,7 +96,7 @@ app.get('/auth/callback', async (req, res) => {
     const roles = memberRes.data.roles || [];
 
     const authToken = crypto.randomBytes(32).toString('hex');
-    tokens[authToken] = {
+    const userData = {
       id: userRes.data.id,
       username: userRes.data.username,
       nick,
@@ -92,8 +104,14 @@ app.get('/auth/callback', async (req, res) => {
       roles
     };
 
-    setTimeout(() => delete tokens[authToken], 24 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 дней
+    await pool.query(
+      'INSERT INTO auth_tokens (token, user_data, expires_at) VALUES ($1, $2, $3)',
+      [authToken, JSON.stringify(userData), expiresAt]
+    );
+
     addLog('login', 'Вошёл в панель', nick);
+    console.log('Auth success for:', nick);
     res.redirect('/panel?token=' + authToken);
   } catch (err) {
     console.error('Auth error:', err.response?.data || err.message);
@@ -116,16 +134,20 @@ app.get('/auth/me', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/auth/logout', (req, res) => {
+app.get('/auth/logout', async (req, res) => {
   const token = req.headers['x-auth-token'] || req.query.token;
-  if (token && tokens[token]) {
-    addLog('logout', 'Вышел из панели', tokens[token].nick);
-    delete tokens[token];
+  if (token) {
+    try {
+      const result = await pool.query('SELECT user_data FROM auth_tokens WHERE token = $1', [token]);
+      if (result.rows.length > 0) {
+        addLog('logout', 'Вышел из панели', result.rows[0].user_data.nick);
+      }
+      await pool.query('DELETE FROM auth_tokens WHERE token = $1', [token]);
+    } catch {}
   }
   res.json({ ok: true });
 });
 
-// API участники и роли
 app.get('/api/members', requireAuth, async (req, res) => {
   try {
     const [membersRes, rolesRes] = await Promise.all([
@@ -168,19 +190,15 @@ app.get('/api/logs', requireAuth, (req, res) => {
   res.json(logs);
 });
 
-// ЗАЯВКИ
-// Получить все заявки (для админов)
 app.get('/api/applications', requireAuth, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM applications ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Ошибка получения заявок' });
   }
 });
 
-// Обновить статус заявки
 app.patch('/api/applications/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -194,23 +212,19 @@ app.patch('/api/applications/:id', requireAuth, async (req, res) => {
     addLog('system', `Заявка "${appName}" — ${statusLabels[status]}`, req.user.nick);
     res.json({ ok: true });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Ошибка обновления заявки' });
   }
 });
 
-// Удалить заявку
 app.delete('/api/applications/:id', requireAuth, async (req, res) => {
-  const { id } = req.params;
   try {
-    await pool.query('DELETE FROM applications WHERE id = $1', [id]);
+    await pool.query('DELETE FROM applications WHERE id = $1', [req.params.id]);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: 'Ошибка удаления' });
   }
 });
 
-// Отправить заявку (публичный роут)
 app.post('/api/apply', async (req, res) => {
   const { name, age, time_on_majestic, other_families, hours_per_day, shooting_stats } = req.body;
   if (!name || !age || !time_on_majestic || !hours_per_day) {
@@ -219,7 +233,7 @@ app.post('/api/apply', async (req, res) => {
   try {
     await pool.query(
       'INSERT INTO applications (name, age, time_on_majestic, other_families, hours_per_day, shooting_stats) VALUES ($1, $2, $3, $4, $5, $6)',
-      [name, age, time_on_majestic, other_families || null, hours_per_day, shooting_stats || null]
+      [name, age, other_families || null, hours_per_day, shooting_stats || null, time_on_majestic]
     );
     addLog('system', `Новая заявка от "${name}"`, 'System');
     res.json({ ok: true });
@@ -229,15 +243,14 @@ app.post('/api/apply', async (req, res) => {
   }
 });
 
-// Страницы
 app.get('/panel', (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
 app.get('/panel/members', (req, res) => res.sendFile(path.join(__dirname, 'members.html')));
 app.get('/panel/roles', (req, res) => res.sendFile(path.join(__dirname, 'roles.html')));
 app.get('/panel/logs', (req, res) => res.sendFile(path.join(__dirname, 'logs.html')));
 app.get('/panel/settings', (req, res) => res.sendFile(path.join(__dirname, 'settings.html')));
 app.get('/panel/applications', (req, res) => res.sendFile(path.join(__dirname, 'applications.html')));
-app.get('/home', (req, res) => res.sendFile(path.join(__dirname, 'home.html')));
 app.get('/apply', (req, res) => res.sendFile(path.join(__dirname, 'apply.html')));
+app.get('/home', (req, res) => res.sendFile(path.join(__dirname, 'home.html')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 app.use((req, res) => res.status(404).send('404: ' + req.url));

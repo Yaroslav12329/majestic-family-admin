@@ -233,7 +233,7 @@ app.post('/api/apply', async (req, res) => {
   try {
     await pool.query(
       'INSERT INTO applications (name, age, time_on_majestic, other_families, hours_per_day, shooting_stats) VALUES ($1, $2, $3, $4, $5, $6)',
-      [name, age, other_families || null, hours_per_day, shooting_stats || null, time_on_majestic]
+      [name, age, time_on_majestic, other_families || null, hours_per_day, shooting_stats || null]
     );
     addLog('system', `Новая заявка от "${name}"`, 'System');
     res.json({ ok: true });

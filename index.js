@@ -232,14 +232,14 @@ app.delete('/api/applications/:id', requireAuth, async (req, res) => {
 });
 
 app.post('/api/apply', async (req, res) => {
-  const { name, age, time_on_majestic, other_families, hours_per_day, shooting_stats } = req.body;
-  if (!name || !age || !time_on_majestic || !hours_per_day) {
+  const { name, age, time_on_majestic, other_families, hours_per_day, shooting_stats, discord_id } = req.body;
+  if (!name || !age || !time_on_majestic || !hours_per_day || !discord_id) {
     return res.status(400).json({ error: 'Заполните все обязательные поля' });
   }
   try {
     await pool.query(
-      'INSERT INTO applications (name, age, time_on_majestic, other_families, hours_per_day, shooting_stats) VALUES ($1, $2, $3, $4, $5, $6)',
-      [name, age, time_on_majestic, other_families || null, hours_per_day, shooting_stats || null]
+      'INSERT INTO applications (name, age, time_on_majestic, other_families, hours_per_day, shooting_stats, discord_id) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [name, age, time_on_majestic, other_families || null, hours_per_day, shooting_stats || null, discord_id]
     );
     addLog('system', `Новая заявка от "${name}"`, 'System');
     res.json({ ok: true });

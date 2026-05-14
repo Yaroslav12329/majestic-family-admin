@@ -249,6 +249,31 @@ app.post('/api/apply', async (req, res) => {
   }
 });
 
+app.post('/api/applications/:id/call', requireAuth, async (req, res) => {
+  const { id } = req.params;
+  const VOICE_LINK = process.env.VOICE_LINK || 'https://discord.gg/panika';
+  try {
+    const result = await pool.query('SELECT * FROM applications WHERE id = $1', [id]);
+    if (!result.rows.length) return res.status(404).json({ error: 'Заявка не найдена' });
+    const app = result.rows[0];
+    if (!app.discord_id) return res.status(400).json({ error: 'Discord ID не указан' });
+    await axios.post(`https://discord.com/api/users/@me/channels`,
+      { recipient_id: app.discord_id },
+      { headers: { Authorization: `Bot ${BOT_TOKEN}` } }
+    ).then(async (dmRes) => {
+      const channelId = dmRes.data.id;
+      await axios.post(`https://discord.com/api/channels/${channelId}/messages`, {
+        content: `👋 Привет, **${app.name}**!\n\nТвоя заявка в семью **Panika** рассмотрена. Тебя приглашают на **обзвон**!\n\n🎙️ Подключайся к голосовому каналу:\n${VOICE_LINK}\n\n// Majestic RP · Family Panika`
+      }, { headers: { Authorization: `Bot ${BOT_TOKEN}` } });
+    });
+    await pool.query('UPDATE applications SET status = $1 WHERE id = $2', ['interview', id]);
+    addLog('system', `Заявка "${app.name}" — вызван на обзвон`, req.user.nick);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    res.status(500).json({ error: 'Ошибка отправки сообщения' });
+  }
+});
 app.get('/panel', (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
 app.get('/panel/members', (req, res) => res.sendFile(path.join(__dirname, 'members.html')));
 app.get('/panel/roles', (req, res) => res.sendFile(path.join(__dirname, 'roles.html')));

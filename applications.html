@@ -226,7 +226,7 @@ function renderApps(apps) {
       <div class="app-fields">
         <div class="app-field"><div class="app-field-label">Время на Маджестике</div><div class="app-field-value">${a.time_on_majestic}</div></div>
         <div class="app-field"><div class="app-field-label">Часов в день</div><div class="app-field-value">${a.hours_per_day}</div></div>
-        ${a.shooting_stats ? `<div class="app-field"><div class="app-field-label">Откат стрельбы</div><div class="app-field-value">${a.shooting_stats}</div></div>` : ''}
+        ${a.shooting_stats ? `<div class="app-field"><div class="app-field-label">Откат стрельбы</div><div class="app-field-value">${a.shooting_stats.startsWith('http') ? `<a href="${a.shooting_stats}" target="_blank" style="color:#818cf8;text-decoration:none;">${a.shooting_stats}</a>` : a.shooting_stats}</div></div>` : ''}
       </div>
       <div class="app-field-full"><div class="app-field-label">Другие семьи</div><div class="app-field-value" style="margin-top:4px;font-weight:400;font-size:13px;color:var(--muted)">${a.other_families||'Нет'}</div></div>
       <div class="app-date">// подана: ${date}</div>

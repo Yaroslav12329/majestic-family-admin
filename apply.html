@@ -18,13 +18,14 @@
   .form-header p { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
   .field { margin-bottom: 20px; }
   .field label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
-  .field label span { color: #ed4245; margin-left: 3px; }
+  .field label span.req { color: #ed4245; margin-left: 3px; }
   .field label .opt { color: var(--muted); font-weight: 400; margin-left: 4px; font-size: 10px; }
   .field input, .field select, .field textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 12px 16px; font-size: 14px; font-family: 'Syne', sans-serif; outline: none; transition: border-color .15s; }
   .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(88,101,242,.5); }
   .field input::placeholder, .field textarea::placeholder { color: var(--muted); }
   .field textarea { resize: vertical; min-height: 80px; }
   .field select option { background: var(--bg3); }
+  .field-hint { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 6px; }
   .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
   .optional-label { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; text-align: center; margin-bottom: 20px; }
   .btn-submit { width: 100%; background: var(--discord); color: white; border: none; border-radius: 12px; padding: 15px; font-size: 15px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; transition: background .2s, transform .15s; margin-top: 8px; }
@@ -49,15 +50,20 @@
     </div>
     <div class="error-msg" id="error-msg"></div>
     <div class="field">
-      <label>Имя (OOC)<span>*</span></label>
+      <label>Имя (OOC)<span class="req">*</span></label>
       <input type="text" id="name" placeholder="Ваше имя вне игры">
     </div>
     <div class="field">
-      <label>Возраст (OOC)<span>*</span></label>
+      <label>Возраст (OOC)<span class="req">*</span></label>
       <input type="number" id="age" placeholder="Ваш реальный возраст" min="1" max="99">
     </div>
     <div class="field">
-      <label>Время на Маджестике<span>*</span></label>
+      <label>Discord ID<span class="req">*</span></label>
+      <input type="text" id="discord_id" placeholder="Пример: 123456789012345678">
+      <div class="field-hint">// Настройки Discord → Расширенные → Режим разработчика → ПКМ на себе → Скопировать ID</div>
+    </div>
+    <div class="field">
+      <label>Время на Маджестике<span class="req">*</span></label>
       <select id="time_on_majestic">
         <option value="">— выберите —</option>
         <option value="Меньше месяца">Меньше месяца</option>
@@ -69,11 +75,11 @@
       </select>
     </div>
     <div class="field">
-      <label>Были в других семьях?<span>*</span></label>
+      <label>Были в других семьях?<span class="req">*</span></label>
       <textarea id="other_families" placeholder="Если да — напишите в каких. Если нет — напишите 'Нет'"></textarea>
     </div>
     <div class="field">
-      <label>Сколько часов в день играете?<span>*</span></label>
+      <label>Сколько часов в день играете?<span class="req">*</span></label>
       <select id="hours_per_day">
         <option value="">— выберите —</option>
         <option value="1-2 часа">1-2 часа</option>
@@ -103,6 +109,7 @@ const API = 'https://majestic-family-admin-u0ze.onrender.com';
 async function submit() {
   const name = document.getElementById('name').value.trim();
   const age = document.getElementById('age').value;
+  const discord_id = document.getElementById('discord_id').value.trim();
   const time_on_majestic = document.getElementById('time_on_majestic').value;
   const other_families = document.getElementById('other_families').value.trim();
   const hours_per_day = document.getElementById('hours_per_day').value;
@@ -111,7 +118,7 @@ async function submit() {
 
   errEl.style.display = 'none';
 
-  if (!name || !age || !time_on_majestic || !other_families || !hours_per_day) {
+  if (!name || !age || !discord_id || !time_on_majestic || !other_families || !hours_per_day) {
     errEl.style.display = 'block';
     errEl.textContent = '// заполните все обязательные поля';
     return;
@@ -123,6 +130,12 @@ async function submit() {
     return;
   }
 
+  if (!/^\d{17,19}$/.test(discord_id)) {
+    errEl.style.display = 'block';
+    errEl.textContent = '// Discord ID должен состоять из 17-19 цифр';
+    return;
+  }
+
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
   btn.textContent = 'Отправка...';
@@ -131,7 +144,7 @@ async function submit() {
     const res = await fetch(`${API}/api/apply`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, age: parseInt(age), time_on_majestic, other_families, hours_per_day, shooting_stats })
+      body: JSON.stringify({ name, age: parseInt(age), discord_id, time_on_majestic, other_families, hours_per_day, shooting_stats })
     });
     const data = await res.json();
     if (res.ok) {

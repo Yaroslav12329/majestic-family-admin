@@ -48,6 +48,15 @@ async function initDB() {
     )
   `);
   await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS discord_id VARCHAR(30)`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS logs (
+      id SERIAL PRIMARY KEY,
+      type VARCHAR(20) NOT NULL,
+      message TEXT NOT NULL,
+      username VARCHAR(100) NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
   console.log('База данных готова');
 }
 
@@ -61,8 +70,10 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 
 const logs = [];
 function addLog(type, message, user = 'System') {
-  logs.unshift({ type, message, user, time: new Date().toISOString() });
-  if (logs.length > 100) logs.pop();
+  pool.query(
+    'INSERT INTO logs (type, message, username) VALUES ($1, $2, $3)',
+    [type, message, user]
+  ).catch(console.error);
 }
 
 async function requireAuth(req, res, next) {
@@ -192,8 +203,19 @@ app.get('/api/roles', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/api/logs', requireAuth, (req, res) => {
-  res.json(logs);
+app.get('/api/logs', requireAuth, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM logs ORDER BY created_at DESC LIMIT 100');
+    const logs = result.rows.map(r => ({
+      type: r.type,
+      message: r.message,
+      user: r.username,
+      time: r.created_at
+    }));
+    res.json(logs);
+  } catch (err) {
+    res.status(500).json({ error: 'Ошибка получения логов' });
+  }
 });
 
 app.get('/api/applications', requireAuth, async (req, res) => {

@@ -3,45 +3,332 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Majestic Admin — Вход</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="https://media.discordapp.net/attachments/1167441950459306075/1488670403017707581/new.png?ex=6a0a44da&is=6a08f35a&hm=c0ca0cd102252e915ec62577b2cb42eb053ab4ed0817495fdd3c51a30276bf30&=&format=webp&quality=lossless&width=960&height=960">
+<title>Panika Family — Majestic RP</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --discord: #5865F2; --discord-h: #4752C4; --bg: #0d0e10; --bg2: #131416; --border: rgba(255,255,255,0.07); --text: #f0f0f2; --muted: #6b6d78; }
-  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-  .login-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 20px; padding: 52px 48px; width: 420px; text-align: center; }
-  .login-logo { width: 64px; height: 64px; background: var(--discord); border-radius: 18px; margin: 0 auto 28px; display: flex; align-items: center; justify-content: center; }
-  .login-logo svg { width: 36px; height: 36px; fill: white; }
-  h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
-  p { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; font-family: 'JetBrains Mono', monospace; }
-  .btn { display: flex; align-items: center; justify-content: center; gap: 12px; background: var(--discord); color: white; border-radius: 12px; padding: 15px 28px; font-size: 15px; font-weight: 600; font-family: 'Syne', sans-serif; width: 100%; text-decoration: none; transition: background .2s; }
-  .btn:hover { background: var(--discord-h); }
-  .btn svg { width: 22px; height: 22px; fill: white; }
-  .note { margin-top: 18px; font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-  .error { background: rgba(237,66,69,.1); border: 1px solid rgba(237,66,69,.3); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #ed4245; font-family: 'JetBrains Mono', monospace; display: none; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #080909; --bg2: #0f1011; --bg3: #161819; --bg4: #1e2022;
+  --border: rgba(255,255,255,0.06); --text: #f0f0f2; --muted: #6b6d78;
+  --accent: #c0392b; --accent2: #e74c3c; --gold: #f39c12;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 18px 60px; display: flex; align-items: center; justify-content: space-between;
+  background: rgba(8,9,9,0.85); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.nav-logo span { color: var(--accent2); }
+.nav-links { display: flex; align-items: center; gap: 32px; }
+.nav-links a { font-size: 13px; font-weight: 600; color: var(--muted); text-decoration: none; transition: color .2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-btn { background: var(--accent); color: white; border: none; border-radius: 8px; padding: 10px 22px; font-size: 13px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; text-decoration: none; transition: background .2s, transform .15s; }
+.nav-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+
+.hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 120px 60px 80px; }
+.hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(192,57,43,0.12) 0%, transparent 70%), radial-gradient(ellipse 40% 60% at 20% 80%, rgba(192,57,43,0.06) 0%, transparent 60%); }
+.hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 60px 60px; mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%); }
+.hero-content { position: relative; z-index: 1; text-align: center; max-width: 800px; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(192,57,43,0.15); border: 1px solid rgba(192,57,43,0.3); border-radius: 20px; padding: 6px 16px; margin-bottom: 28px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--accent2); }
+.hero-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.hero h1 { font-size: clamp(56px, 10vw, 100px); font-weight: 800; line-height: 0.95; letter-spacing: -3px; margin-bottom: 24px; }
+.hero h1 .red { color: var(--accent2); }
+.hero h1 .dim { color: rgba(240,240,242,0.3); }
+.hero-desc { font-size: 16px; color: var(--muted); line-height: 1.7; max-width: 520px; margin: 0 auto 40px; font-family: 'JetBrains Mono', monospace; }
+.hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn-primary { background: var(--accent); color: white; border: none; border-radius: 10px; padding: 14px 32px; font-size: 15px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; text-decoration: none; transition: all .2s; display: inline-flex; align-items: center; gap: 8px; }
+.btn-primary:hover { background: var(--accent2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(192,57,43,0.3); }
+.btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 14px 32px; font-size: 15px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; text-decoration: none; transition: all .2s; }
+.btn-secondary:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.04); }
+.hero-stats { display: flex; gap: 48px; justify-content: center; margin-top: 64px; padding-top: 48px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.hero-stat { text-align: center; }
+.hero-stat-v { font-size: 36px; font-weight: 800; letter-spacing: -1px; }
+.hero-stat-v span { color: var(--accent2); }
+.hero-stat-l { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+section { padding: 100px 60px; }
+.section-tag { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--accent2); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 14px; }
+.section-title { font-size: clamp(32px, 5vw, 48px); font-weight: 800; letter-spacing: -1.5px; margin-bottom: 16px; }
+.section-sub { font-size: 15px; color: var(--muted); font-family: 'JetBrains Mono', monospace; line-height: 1.7; max-width: 560px; }
+
+.about { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; max-width: 1200px; margin: 0 auto; }
+.about-timeline { display: flex; flex-direction: column; gap: 0; }
+.timeline-item { display: flex; gap: 20px; padding-bottom: 28px; position: relative; }
+.timeline-item:not(:last-child)::before { content: ''; position: absolute; left: 15px; top: 32px; bottom: 0; width: 1px; background: var(--border); }
+.timeline-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--bg4); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; }
+.timeline-item.active .timeline-dot { background: rgba(192,57,43,0.2); border-color: var(--accent); }
+.timeline-body { padding-top: 4px; }
+.timeline-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.timeline-desc { font-size: 13px; color: var(--muted); font-family: 'JetBrains Mono', monospace; line-height: 1.6; }
+.about-image { aspect-ratio: 4/3; border-radius: 16px; overflow: hidden; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; position: relative; }
+.about-image-placeholder { text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.about-image-placeholder .icon { font-size: 48px; margin-bottom: 12px; display: block; opacity: .3; }
+.about-image::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(192,57,43,0.1) 0%, transparent 60%); }
+
+.mcl { max-width: 1200px; margin: 0 auto; }
+.mcl-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; flex-wrap: wrap; gap: 20px; }
+.mcl-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.mcl-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 24px; transition: all .2s; position: relative; overflow: hidden; }
+.mcl-card:hover { border-color: rgba(192,57,43,0.3); transform: translateY(-2px); }
+.mcl-card.gold { border-color: rgba(243,156,18,0.3); }
+.mcl-card.gold::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gold); }
+.mcl-place { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; }
+.mcl-place.first { color: var(--gold); }
+.mcl-place.second { color: #bdc3c7; }
+.mcl-place.third { color: #cd7f32; }
+.mcl-tournament { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.mcl-info { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.mcl-trophy { position: absolute; top: 20px; right: 20px; font-size: 24px; opacity: .6; }
+
+.gallery { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.gallery-inner { max-width: 1200px; margin: 0 auto; }
+.gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 48px; }
+.gallery-item { aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; position: relative; transition: all .2s; }
+.gallery-item:hover { border-color: rgba(192,57,43,0.3); transform: scale(1.02); }
+.gallery-item:first-child { grid-column: span 2; aspect-ratio: 21/9; }
+.gallery-placeholder { text-align: center; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.gallery-placeholder span { font-size: 28px; display: block; margin-bottom: 8px; opacity: .2; }
+
+.streamers-inner { max-width: 1200px; margin: 0 auto; }
+.streamers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-top: 48px; }
+.streamer-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 20px; text-align: center; text-decoration: none; color: var(--text); transition: all .2s; display: block; }
+.streamer-card:hover { border-color: rgba(145,70,255,0.4); transform: translateY(-2px); background: var(--bg3); }
+.streamer-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--bg4); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; border: 2px solid var(--border); color: var(--accent2); }
+.streamer-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.streamer-platform { font-size: 11px; color: #9147ff; font-family: 'JetBrains Mono', monospace; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.streamer-platform::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #9147ff; }
+
+.socials { background: var(--bg2); border-top: 1px solid var(--border); }
+.socials-inner { max-width: 1200px; margin: 0 auto; }
+.socials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-top: 48px; }
+.social-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 14px; padding: 24px; text-decoration: none; color: var(--text); transition: all .2s; display: flex; flex-direction: column; gap: 12px; }
+.social-card:hover { transform: translateY(-2px); }
+.social-card.discord:hover { border-color: rgba(88,101,242,.4); background: rgba(88,101,242,.05); }
+.social-card.telegram:hover { border-color: rgba(0,136,204,.4); background: rgba(0,136,204,.05); }
+.social-card.twitch:hover { border-color: rgba(145,70,255,.4); background: rgba(145,70,255,.05); }
+.social-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.social-icon.discord { background: rgba(88,101,242,.2); }
+.social-icon.telegram { background: rgba(0,136,204,.2); }
+.social-icon.twitch { background: rgba(145,70,255,.2); }
+.social-icon svg { width: 22px; height: 22px; }
+.social-name { font-size: 15px; font-weight: 700; }
+.social-desc { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.social-arrow { font-size: 18px; margin-top: auto; opacity: .4; }
+
+.cta { text-align: center; padding: 120px 60px; background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(192,57,43,0.1) 0%, transparent 70%); border-top: 1px solid var(--border); }
+.cta h2 { font-size: clamp(36px, 6vw, 60px); font-weight: 800; letter-spacing: -2px; margin-bottom: 16px; }
+.cta h2 span { color: var(--accent2); }
+.cta p { font-size: 15px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-bottom: 40px; max-width: 480px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+
+footer { padding: 32px 60px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.footer-logo { font-size: 16px; font-weight: 800; }
+.footer-logo span { color: var(--accent2); }
+.footer-text { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+@media (max-width: 768px) {
+  nav { padding: 16px 20px; }
+  .nav-links { display: none; }
+  section { padding: 60px 20px; }
+  .about-grid { grid-template-columns: 1fr; gap: 40px; }
+  .gallery-grid { grid-template-columns: 1fr; }
+  .gallery-item:first-child { grid-column: span 1; aspect-ratio: 16/9; }
+  .hero { padding: 100px 20px 60px; }
+  .hero-stats { gap: 24px; }
+  footer { padding: 24px 20px; flex-direction: column; text-align: center; }
+  .cta { padding: 80px 20px; }
+}
 </style>
 </head>
 <body>
-<div class="login-box">
-  <div class="login-logo">
-    <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.031.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+
+<nav>
+  <div class="nav-logo">PANIKA<span>.</span></div>
+  <div class="nav-links">
+    <a href="#about">О семье</a>
+    <a href="#mcl">MCL</a>
+    <a href="#gallery">Галерея</a>
+    <a href="#streamers">Стримеры</a>
+    <a href="#socials">Соцсети</a>
   </div>
-  <h1>Majestic Admin</h1>
-  <p>Войдите через Discord чтобы получить доступ к панели</p>
-  <div class="error" id="err"></div>
-  <a class="btn" href="/auth/login">
-    <svg viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.031.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-    Войти через Discord
-  </a>
-  <p class="note">// только для участников сервера</p>
-</div>
-<script>
-  const p = new URLSearchParams(window.location.search);
-  if (p.get('error')) {
-    const e = document.getElementById('err');
-    e.style.display = 'block';
-    e.textContent = '// ошибка авторизации, попробуй снова';
-  }
-</script>
+  <a class="nav-btn" href="https://discord.gg/panika">Подать заявку</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Majestic RP · Orlando · Активно</div>
+    <h1><span class="dim">FAMILY</span><br><span class="red">PANIKA</span></h1>
+    <p class="hero-desc">// Одна из сильнейших семей на Majestic RP. Прошли путь через 5 серверов — сейчас на Orlando.</p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="https://discord.gg/panika">Вступить в семью →</a>
+      <a class="btn-secondary" href="#about">Узнать больше</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-v">MCL<span>#1</span></div><div class="hero-stat-l">Турниры</div></div>
+      <div class="hero-stat"><div class="hero-stat-v"><span>5</span></div><div class="hero-stat-l">Серверов</div></div>
+      <div class="hero-stat"><div class="hero-stat-v"><span>5</span></div><div class="hero-stat-l">Стримеров</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="about" id="about">
+  <div class="about-grid">
+    <div>
+      <div class="section-tag">// история</div>
+      <h2 class="section-title">Откуда мы пришли</h2>
+      <p class="section-sub" style="margin-bottom: 40px;">Семья Panika прошла долгий путь через множество серверов Majestic RP — и везде оставалась в числе лучших.</p>
+      <div class="about-timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot">🗽</div>
+          <div class="timeline-body">
+            <div class="timeline-title">New York — начало</div>
+            <div class="timeline-desc">Семья Panika начала свой путь на сервере New York проекта Majestic RP. Первые шаги, первые победы.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">🍑</div>
+          <div class="timeline-body">
+            <div class="timeline-title">Atlanta</div>
+            <div class="timeline-desc">Переезд на сервер Atlanta — семья продолжает расти и укреплять позиции среди сильнейших.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">🫐</div>
+          <div class="timeline-body">
+            <div class="timeline-title">Boston</div>
+            <div class="timeline-desc">Очередной переезд на сервер Boston. Panika продолжает оставаться одной из топовых семей проекта.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">🌅</div>
+          <div class="timeline-body">
+            <div class="timeline-title">Phoenix</div>
+            <div class="timeline-desc">Переход на Phoenix — один из знаковых серверов в истории семьи. Здесь были закалены традиции Panika.</div>
+          </div>
+        </div>
+        <div class="timeline-item active">
+          <div class="timeline-dot">🏆</div>
+          <div class="timeline-body">
+            <div class="timeline-title">Orlando · Сейчас</div>
+            <div class="timeline-desc">Активно играем на сервере Orlando, участвуем в MCL турнирах и занимаем первые места.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="about-image">
+      <div class="about-image-placeholder">
+        <span class="icon">📸</span>
+        <div>// фото семьи</div>
+        <div style="margin-top:4px;opacity:.5">скоро</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="mcl">
+  <div class="mcl">
+    <div class="mcl-header">
+      <div>
+        <div class="section-tag">// достижения</div>
+        <h2 class="section-title">MCL Турниры</h2>
+        <p class="section-sub">Panika регулярно участвует в MCL турнирах на Majestic RP и занимает призовые места.</p>
+      </div>
+    </div>
+    <div class="mcl-cards">
+      <div class="mcl-card gold"><div class="mcl-trophy">🏆</div><div class="mcl-place first">1st</div><div class="mcl-tournament">MCL Tournament</div><div class="mcl-info">// Majestic RP · Orlando</div></div>
+      <div class="mcl-card"><div class="mcl-trophy">🥈</div><div class="mcl-place second">2nd</div><div class="mcl-tournament">MCL Tournament</div><div class="mcl-info">// Majestic RP · Orlando</div></div>
+      <div class="mcl-card gold"><div class="mcl-trophy">🥇</div><div class="mcl-place first">1st</div><div class="mcl-tournament">MCL Tournament</div><div class="mcl-info">// Majestic RP · Orlando</div></div>
+      <div class="mcl-card"><div class="mcl-trophy">🥉</div><div class="mcl-place third">3rd</div><div class="mcl-tournament">MCL Tournament</div><div class="mcl-info">// Majestic RP · Orlando</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="gallery" id="gallery">
+  <div class="gallery-inner">
+    <div class="section-tag">// галерея</div>
+    <h2 class="section-title">Моменты Panika</h2>
+    <div class="gallery-grid">
+      <div class="gallery-item"><img src="https://i.imgur.com/9jVC0rK.jpeg" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div class="gallery-item"><img src="https://i.imgur.com/sBDMB1x.jpeg" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div class="gallery-item"><img src="https://i.imgur.com/03UkSKN.jpeg" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div class="gallery-item"><img src="https://i.imgur.com/kl6PDgh.jpeg" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div class="gallery-item"><img src="https://media.discordapp.net/attachments/1167441950459306075/1386580453326323722/1.png?ex=6a0aa52d&is=6a0953ad&hm=80bbeb4db9171f53b925165f57b8f473c92bddec443d7440a3cf514f114a0b13&=&format=webp&quality=lossless&width=1521&height=856" style="width:100%;height:100%;object-fit:cover;"></div>
+    </div>
+  </div>
+</section>
+
+<section id="streamers">
+  <div class="streamers-inner">
+    <div class="section-tag">// стримеры</div>
+    <h2 class="section-title">Наши стримеры</h2>
+    <p class="section-sub">Следи за жизнью семьи в прямом эфире на Twitch.</p>
+    <div class="streamers-grid">
+      <a class="streamer-card" href="https://www.twitch.tv/sudarpnk" target="_blank"><div class="streamer-avatar">S</div><div class="streamer-name">sudarpnk</div><div class="streamer-platform">Twitch</div></a>
+      <a class="streamer-card" href="https://www.twitch.tv/uglypnk" target="_blank"><div class="streamer-avatar">U</div><div class="streamer-name">uglypnk</div><div class="streamer-platform">Twitch</div></a>
+      <a class="streamer-card" href="https://www.twitch.tv/winstonpnk" target="_blank"><div class="streamer-avatar">W</div><div class="streamer-name">winstonpnk</div><div class="streamer-platform">Twitch</div></a>
+      <a class="streamer-card" href="https://www.twitch.tv/antisocccia" target="_blank"><div class="streamer-avatar">A</div><div class="streamer-name">antisocccia</div><div class="streamer-platform">Twitch</div></a>
+      <a class="streamer-card" href="https://www.twitch.tv/dionispanika" target="_blank"><div class="streamer-avatar">D</div><div class="streamer-name">dionispanika</div><div class="streamer-platform">Twitch</div></a>
+    </div>
+  </div>
+</section>
+
+<section class="socials" id="socials">
+  <div class="socials-inner">
+    <div class="section-tag">// сообщество</div>
+    <h2 class="section-title">Наши соцсети</h2>
+    <p class="section-sub">Присоединяйся к нашему сообществу — будь в курсе всех событий семьи.</p>
+    <div class="socials-grid">
+      <a class="social-card discord" href="https://discord.gg/panika" target="_blank">
+        <div class="social-icon discord"><svg viewBox="0 0 24 24" fill="#5865F2"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.031.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></div>
+        <div class="social-name">Discord семьи</div>
+        <div class="social-desc">// основной сервер Panika</div>
+        <div class="social-arrow">→</div>
+      </a>
+      <a class="social-card discord" href="https://discord.gg/hmPhvx9qN" target="_blank">
+        <div class="social-icon discord"><svg viewBox="0 0 24 24" fill="#5865F2"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.031.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></div>
+        <div class="social-name">Discord с модами</div>
+        <div class="social-desc">// редуксы и моды для игры</div>
+        <div class="social-arrow">→</div>
+      </a>
+      <a class="social-card telegram" href="https://t.me/panikamedia" target="_blank">
+        <div class="social-icon telegram"><svg viewBox="0 0 24 24" fill="#0088cc"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></div>
+        <div class="social-name">Telegram канал</div>
+        <div class="social-desc">// моды и медиа Panika</div>
+        <div class="social-arrow">→</div>
+      </a>
+      <a class="social-card twitch" href="https://www.twitch.tv/sudarpnk" target="_blank">
+        <div class="social-icon twitch"><svg viewBox="0 0 24 24" fill="#9147ff"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg></div>
+        <div class="social-name">Twitch стримы</div>
+        <div class="social-desc">// прямые эфиры семьи</div>
+        <div class="social-arrow">→</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="section-tag">// вступление</div>
+  <h2>Готов стать частью<br><span>Panika?</span></h2>
+  <p>// заполни заявку и мы свяжемся с тобой. Нужны активные игроки с хорошим скиллом.</p>
+  <a class="btn-primary" href="https://discord.gg/panika" style="display:inline-flex;">Подать заявку →</a>
+</section>
+
+<footer>
+  <div class="footer-logo">PANIKA<span>.</span></div>
+  <div class="footer-text">// Majestic RP · Orlando · 2024</div>
+  <div class="footer-text">// panika family</div>
+</footer>
+
 </body>
 </html>

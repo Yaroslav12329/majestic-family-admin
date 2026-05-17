@@ -296,6 +296,13 @@ app.post('/api/applications/:id/call', requireAuth, async (req, res) => {
     res.status(500).json({ error: 'Ошибка отправки сообщения' });
   }
 });
+// Когда люди заходят на бэкенд напрямую, отдаем им обёртку (теперь это index.html)
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
+// Ссылку /home теперь привязываем к окну авторизации (так как ты переименовал вход в home.html)
+app.get('/home', (req, res) => res.sendFile(path.join(__dirname, 'home.html')));
+
+// Остальные страницы панели остаются без изменений
 app.get('/panel', (req, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
 app.get('/panel/members', (req, res) => res.sendFile(path.join(__dirname, 'members.html')));
 app.get('/panel/roles', (req, res) => res.sendFile(path.join(__dirname, 'roles.html')));
@@ -303,8 +310,6 @@ app.get('/panel/logs', (req, res) => res.sendFile(path.join(__dirname, 'logs.htm
 app.get('/panel/settings', (req, res) => res.sendFile(path.join(__dirname, 'settings.html')));
 app.get('/panel/applications', (req, res) => res.sendFile(path.join(__dirname, 'applications.html')));
 app.get('/apply', (req, res) => res.sendFile(path.join(__dirname, 'apply.html')));
-app.get('/home', (req, res) => res.sendFile(path.join(__dirname, 'home.html')));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 app.use((req, res) => res.status(404).send('404: ' + req.url));
 

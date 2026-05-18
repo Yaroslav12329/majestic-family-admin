@@ -298,7 +298,35 @@ app.post('/api/applications/:id/call', requireAuth, async (req, res) => {
 });
 // Когда люди заходят на бэкенд напрямую, отдаем им обёртку (теперь это index.html)
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-
+app.get('/api/stream', async (req, res) => {
+  const streamers = ['dezlichh', 'dionispanika', 'antisocccia', 'winstonpnk', 'uglypnk', 'sudarpnk'];
+  try {
+    const tokenRes = await axios.post('https://id.twitch.tv/oauth2/token', null, {
+      params: {
+        client_id: process.env.TWITCH_CLIENT_ID,
+        client_secret: process.env.TWITCH_CLIENT_SECRET,
+        grant_type: 'client_credentials'
+      }
+    });
+    const accessToken = tokenRes.data.access_token;
+    const query = streamers.map(s => `user_login=${s}`).join('&');
+    const streamsRes = await axios.get(`https://api.twitch.tv/helix/streams?${query}`, {
+      headers: {
+        'Client-ID': process.env.TWITCH_CLIENT_ID,
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+    const liveStreams = streamsRes.data.data;
+    if (liveStreams.length > 0) {
+      res.json({ live: true, streamer: liveStreams[0].user_login, title: liveStreams[0].title, viewers: liveStreams[0].viewer_count });
+    } else {
+      res.json({ live: false });
+    }
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    res.json({ live: false });
+  }
+});
 // Ссылку /home теперь привязываем к окну авторизации (так как ты переименовал вход в home.html)
 app.get('/home', (req, res) => res.sendFile(path.join(__dirname, 'home.html')));
 

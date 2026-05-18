@@ -286,6 +286,135 @@ section { padding: 100px 60px; }
   .lightbox-close { top: 16px; right: 20px; font-size: 30px; }
 }
 
+/* === СЕКЦИЯ АКТИВНОГО СТРИМА === */
+.live-stream-section {
+  display: none;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 80px 60px;
+  position: relative;
+  overflow: hidden;
+}
+.live-stream-section.visible {
+  display: block;
+}
+.live-stream-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(145,70,255,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.live-stream-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.live-stream-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 36px;
+}
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(145,70,255,0.15);
+  border: 1px solid rgba(145,70,255,0.35);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #a970ff;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  width: fit-content;
+}
+.live-badge::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a970ff;
+  animation: livePulse 1.4s infinite;
+  flex-shrink: 0;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+.live-stream-title {
+  font-size: clamp(24px, 4vw, 38px);
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+.live-stream-title span { color: #a970ff; }
+.live-stream-meta {
+  font-size: 13px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 6px;
+}
+.live-stream-meta strong {
+  color: var(--text);
+  font-weight: 700;
+}
+.live-viewers {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(192,57,43,0.12);
+  border: 1px solid rgba(192,57,43,0.25);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent2);
+  font-weight: 600;
+}
+.live-viewers::before {
+  content: '👁';
+  font-size: 13px;
+}
+.live-embed-wrap {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 */
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(145,70,255,0.25);
+  box-shadow: 0 0 60px rgba(145,70,255,0.1), 0 20px 60px rgba(0,0,0,0.5);
+}
+.live-embed-wrap iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 16px;
+}
+.live-stream-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  color: #a970ff;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.live-stream-link:hover { color: #c39cff; }
+.live-stream-link svg { width: 16px; height: 16px; fill: currentColor; }
+
 .socials { background: var(--bg2); border-top: 1px solid var(--border); }
 .socials-inner { max-width: 1200px; margin: 0 auto; }
 .socials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-top: 48px; }
@@ -489,6 +618,35 @@ footer { padding: 32px 60px; border-top: 1px solid var(--border); display: flex;
   </div>
 </section>
 
+<!-- СЕКЦИЯ АКТИВНОГО СТРИМА — показывается только когда кто-то в эфире -->
+<section class="live-stream-section" id="liveStreamSection">
+  <div class="live-stream-inner">
+    <div class="live-stream-header">
+      <div>
+        <div class="live-badge">● Live сейчас</div>
+        <div class="live-stream-title">Panika <span>в эфире</span></div>
+        <div class="live-stream-meta">
+          стример: <strong id="liveStreamerName">—</strong> &nbsp;·&nbsp;
+          <span id="liveStreamTitle" style="opacity:.7">—</span>
+        </div>
+      </div>
+      <div class="live-viewers" id="liveViewers">0 зрителей</div>
+    </div>
+    <div class="live-embed-wrap">
+      <iframe
+        id="liveEmbed"
+        src=""
+        allowfullscreen
+        allow="autoplay; fullscreen"
+      ></iframe>
+    </div>
+    <a class="live-stream-link" id="liveTwitchLink" href="#" target="_blank">
+      <svg viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
+      Открыть на Twitch →
+    </a>
+  </div>
+</section>
+
 <section class="socials" id="socials">
   <div class="socials-inner">
     <div class="section-tag">// сообщество</div>
@@ -664,6 +822,42 @@ footer { padding: 32px 60px; border-top: 1px solid var(--border); display: flex;
     lightbox.classList.remove('active');
     document.body.style.overflow = ''; // Возвращаем прокрутку
   }
+
+  // === СЕКЦИЯ АКТИВНОГО СТРИМА ===
+  async function checkLiveStream() {
+    try {
+      const res = await fetch('/api/stream');
+      const data = await res.json();
+      const section = document.getElementById('liveStreamSection');
+
+      if (data.live && data.streamer) {
+        const streamer = data.streamer;
+        const hostname = window.location.hostname || 'localhost';
+
+        document.getElementById('liveStreamerName').textContent = streamer;
+        document.getElementById('liveStreamTitle').textContent = data.title || '';
+        document.getElementById('liveViewers').textContent =
+          (data.viewers ? data.viewers.toLocaleString('ru') : '0') + ' \u0437\u0440\u0438\u0442\u0435\u043b\u0435\u0439';
+
+        const twitchLink = 'https://www.twitch.tv/' + streamer;
+        document.getElementById('liveTwitchLink').href = twitchLink;
+
+        // Twitch embed требует параметр parent с доменом страницы
+        const embedSrc = 'https://player.twitch.tv/?channel=' + encodeURIComponent(streamer) + '&parent=' + hostname + '&autoplay=false&muted=false';
+        document.getElementById('liveEmbed').src = embedSrc;
+
+        section.classList.add('visible');
+      } else {
+        section.classList.remove('visible');
+      }
+    } catch (e) {
+      document.getElementById('liveStreamSection').classList.remove('visible');
+    }
+  }
+
+  // Проверяем сразу и потом каждые 2 минуты
+  checkLiveStream();
+  setInterval(checkLiveStream, 120000);
 </script>
 
 </body>

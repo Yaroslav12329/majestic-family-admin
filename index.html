@@ -843,8 +843,12 @@ footer { padding: 32px 60px; border-top: 1px solid var(--border); display: flex;
         document.getElementById('liveTwitchLink').href = twitchLink;
 
         // Twitch embed требует параметр parent с доменом страницы
-        const embedSrc = 'https://player.twitch.tv/?channel=' + encodeURIComponent(streamer) + '&parent=' + hostname + '&autoplay=false&muted=false';
-        document.getElementById('liveEmbed').src = embedSrc;
+const iframe = document.getElementById('liveEmbed');
+const newSrc = 'https://player.twitch.tv/?channel=' + encodeURIComponent(streamer) + '&parent=' + hostname + '&autoplay=false&muted=false';
+// Обновляем плеер только если стример изменился
+if (iframe.src !== newSrc) {
+  iframe.src = newSrc;
+}
 
         section.classList.add('visible');
       } else {

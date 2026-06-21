@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="https://i.imgur.com/aus4di4.png">
+<title>Статистика каптов — Panika</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #080909; --bg2: #0f1011; --bg3: #161819; --bg4: #1e2022;
+  --border: rgba(255,255,255,0.06); --text: #f0f0f2; --muted: #6b6d78;
+  --accent: #c0392b; --accent2: #e74c3c; --green: #27ae60; --yellow: #f39c12;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 18px 60px; display: flex; align-items: center; justify-content: space-between;
+  background: rgba(8,9,9,0.9); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; text-decoration: none; color: var(--text); }
+.nav-logo span { color: var(--accent2); }
+.nav-links { display: flex; align-items: center; gap: 32px; }
+.nav-links a { font-size: 13px; font-weight: 600; color: var(--muted); text-decoration: none; transition: color .2s; }
+.nav-links a:hover, .nav-links a.active { color: var(--text); }
+.nav-links a.active { color: var(--accent2); }
+.nav-btn { background: var(--accent); color: white; border: none; border-radius: 8px; padding: 10px 22px; font-size: 13px; font-weight: 700; font-family: 'Syne', sans-serif; cursor: pointer; text-decoration: none; transition: background .2s; }
+.nav-btn:hover { background: var(--accent2); }
+
+.page-hero {
+  padding: 120px 60px 60px;
+  border-bottom: 1px solid var(--border);
+  background: radial-gradient(ellipse 60% 80% at 30% 50%, rgba(192,57,43,0.08) 0%, transparent 70%);
+}
+.page-tag { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--accent2); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+.page-title { font-size: clamp(32px, 5vw, 52px); font-weight: 800; letter-spacing: -2px; margin-bottom: 10px; }
+.page-title span { color: var(--accent2); }
+.page-sub { font-size: 14px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+.content { padding: 40px 60px 80px; max-width: 1400px; margin: 0 auto; }
+
+/* FILTERS */
+.filters-block { margin-bottom: 28px; }
+.filter-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.filter-label { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+.srv-btn {
+  background: var(--bg2); border: 1px solid var(--border); color: var(--muted);
+  font-size: 12px; font-weight: 600; font-family: 'Syne', sans-serif;
+  padding: 6px 14px; border-radius: 7px; cursor: pointer;
+  transition: all .15s; white-space: nowrap;
+}
+.srv-btn:hover { border-color: var(--accent); color: var(--text); }
+.srv-btn.active { background: rgba(192,57,43,0.15); border-color: var(--accent); color: var(--accent2); }
+
+.sort-select, .search-input {
+  background: var(--bg2); border: 1px solid var(--border); color: var(--text);
+  font-size: 13px; font-family: 'Syne', sans-serif;
+  padding: 8px 14px; border-radius: 8px; outline: none;
+  transition: border-color .15s;
+}
+.sort-select:focus, .search-input:focus { border-color: var(--accent); }
+.search-input { width: 240px; }
+.search-input::placeholder { color: var(--muted); }
+.divider { width: 1px; height: 24px; background: var(--border); }
+
+/* TABLE */
+.table-wrap {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+}
+.table-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 22px; border-bottom: 1px solid var(--border);
+}
+.table-head h3 { font-size: 16px; font-weight: 700; }
+.table-count { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left; font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--muted); font-weight: 600;
+  padding: 10px 22px; border-bottom: 1px solid var(--border);
+}
+th.r, td.r { text-align: right; }
+tbody tr { transition: background .1s; cursor: default; }
+tbody tr:hover { background: var(--bg3); }
+tbody td { padding: 12px 22px; font-size: 14px; border-bottom: 1px solid var(--border); }
+tbody tr:last-child td { border-bottom: none; }
+
+.rank { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--muted); font-weight: 600; }
+.rank-1 { color: var(--yellow); font-size: 15px; }
+.rank-2 { color: #bdc3c7; font-size: 14px; }
+.rank-3 { color: #cd7f32; font-size: 14px; }
+.player-name { font-weight: 700; font-size: 15px; }
+.player-family { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+.num { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.wr { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; }
+.wr-hi { color: var(--green); }
+.wr-md { color: var(--yellow); }
+.wr-lo { color: var(--accent2); }
+
+.loading { text-align: center; padding: 80px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.loading::after { content: ''; animation: dots 1.2s infinite; }
+@keyframes dots { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.error { text-align: center; padding: 60px; color: var(--accent2); font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+
+@media (max-width: 768px) {
+  nav { padding: 16px 20px; }
+  .nav-links { display: none; }
+  .page-hero { padding: 100px 20px 40px; }
+  .content { padding: 24px 20px 60px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">PANIKA<span>.</span></a>
+  <div class="nav-links">
+    <a href="/">Главная</a>
+    <a href="/#about">О семье</a>
+    <a href="/#mcl">MCL</a>
+    <a href="/#streamers">Стримеры</a>
+    <a href="/stats" class="active">📊 Статистика</a>
+  </div>
+  <a class="nav-btn" href="https://discord.gg/panika">Подать заявку</a>
+</nav>
+
+<div class="page-hero">
+  <div class="page-tag">// Majestic RP · Капты</div>
+  <h1 class="page-title">Статистика <span>каптов</span></h1>
+  <p class="page-sub">Рейтинг игроков по серверам — убийства, урон, винрейт. Данные обновляются при загрузке.</p>
+</div>
+
+<div class="content">
+
+  <div class="filters-block">
+    <div class="filter-row">
+      <span class="filter-label">Сервер:</span>
+      <div id="server-btns" style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="srv-btn active" data-server="ru18">Orlando</button>
+        <button class="srv-btn" data-server="ru19">Memphis</button>
+        <button class="srv-btn" data-server="ru17">Portland</button>
+        <button class="srv-btn" data-server="ru16">Denver</button>
+        <button class="srv-btn" data-server="ru15">Phoenix</button>
+        <button class="srv-btn" data-server="ru14">Seattle</button>
+        <button class="srv-btn" data-server="ru13">Houston</button>
+        <button class="srv-btn" data-server="ru12">Boston</button>
+        <button class="srv-btn" data-server="ru11">Dallas</button>
+        <button class="srv-btn" data-server="ru10">Washington</button>
+        <button class="srv-btn" data-server="ru9">Las Vegas</button>
+        <button class="srv-btn" data-server="ru8">Miami</button>
+        <button class="srv-btn" data-server="ru7">Los Angeles</button>
+        <button class="srv-btn" data-server="ru6">San Diego</button>
+        <button class="srv-btn" data-server="ru5">Atlanta</button>
+        <button class="srv-btn" data-server="ru4">San Francisco</button>
+        <button class="srv-btn" data-server="ru3">Chicago</button>
+        <button class="srv-btn" data-server="ru2">Detroit</button>
+        <button class="srv-btn" data-server="ru1">New York</button>
+      </div>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">Сортировка:</span>
+      <select class="sort-select" id="sort-select">
+        <option value="rating">Рейтинг</option>
+        <option value="totalKills">Убийства (всего)</option>
+        <option value="avgKills">Убийства (среднее)</option>
+        <option value="totalDamage">Урон (всего)</option>
+        <option value="avgDamage">Урон (среднее)</option>
+        <option value="winrate">Винрейт</option>
+        <option value="capturesPlayed">Каптов сыграно</option>
+      </select>
+      <div class="divider"></div>
+      <input class="search-input" id="search-input" placeholder="Поиск по нику или семье...">
+    </div>
+  </div>
+
+  <div id="loading" class="loading">Загружаем данные </div>
+  <div id="error" class="error" style="display:none">// Не удалось загрузить данные. Попробуйте другой сервер.</div>
+
+  <div id="content" style="display:none">
+    <div class="table-wrap">
+      <div class="table-head">
+        <h3>Топ игроков</h3>
+        <span class="table-count" id="table-count"></span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:44px">#</th>
+            <th>Игрок</th>
+            <th class="r">Рейтинг</th>
+            <th class="r">Убийств</th>
+            <th class="r">Ср. урон</th>
+            <th class="r">Винрейт</th>
+            <th class="r">Каптов</th>
+          </tr>
+        </thead>
+        <tbody id="players-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = '/api/player-ratings';
+let allPlayers = [];
+let currentSort = 'rating';
+let searchQuery = '';
+
+async function loadPlayers(serverId) {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('content').style.display = 'none';
+  document.getElementById('error').style.display = 'none';
+  try {
+    const res = await fetch(`${API}?serverId=${serverId}`);
+    if (!res.ok) throw new Error();
+    const json = await res.json();
+    allPlayers = json.players;
+    renderTable();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+  } catch {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').style.display = 'block';
+  }
+}
+
+function renderTable() {
+  let filtered = allPlayers.filter(p => {
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return p.nickname.toLowerCase().includes(q) || p.family.toLowerCase().includes(q);
+    }
+    return p.rating !== null;
+  });
+  filtered.sort((a, b) => (b[currentSort] ?? -1) - (a[currentSort] ?? -1));
+  document.getElementById('table-count').textContent = `${filtered.length.toLocaleString('ru-RU')} игроков`;
+  document.getElementById('players-tbody').innerHTML = filtered.map((p, i) => {
+    const rankHtml = i === 0 ? '<span class="rank-1">🥇</span>'
+      : i === 1 ? '<span class="rank-2">🥈</span>'
+      : i === 2 ? '<span class="rank-3">🥉</span>'
+      : `<span class="rank">${i + 1}</span>`;
+    const wr = (p.winrate * 100).toFixed(0);
+    const wrClass = wr >= 70 ? 'wr-hi' : wr >= 45 ? 'wr-md' : 'wr-lo';
+    return `<tr>
+      <td>${rankHtml}</td>
+      <td>
+        <div class="player-name">${p.nickname}</div>
+        <div class="player-family">${p.family}</div>
+      </td>
+      <td class="r num"><b>${p.rating ?? '—'}</b></td>
+      <td class="r num">${p.totalKills.toLocaleString('ru-RU')}</td>
+      <td class="r num">${p.avgDamage.toLocaleString('ru-RU')}</td>
+      <td class="r wr ${wrClass}">${wr}%</td>
+      <td class="r num">${p.capturesPlayed}</td>
+    </tr>`;
+  }).join('');
+}
+
+document.getElementById('server-btns').addEventListener('click', e => {
+  const btn = e.target.closest('.srv-btn');
+  if (!btn) return;
+  document.querySelectorAll('.srv-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadPlayers(btn.dataset.server);
+});
+
+document.getElementById('sort-select').addEventListener('change', e => {
+  currentSort = e.target.value; renderTable();
+});
+
+let t;
+document.getElementById('search-input').addEventListener('input', e => {
+  clearTimeout(t);
+  t = setTimeout(() => { searchQuery = e.target.value.trim(); renderTable(); }, 300);
+});
+
+loadPlayers('ru18');
+</script>
+</body>
+</html>

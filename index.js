@@ -346,23 +346,21 @@ app.get('/api/player-ratings', async (req, res) => {
   try {
     const response = await axios.get(
       `https://mitsuki-hub.ru/api/ext-captures/player-ratings?serverId=${serverId}`,
-      {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          'Referer': 'https://mitsuki-hub.ru/captures?tab=ratings',
-          'Origin': 'https://mitsuki-hub.ru',
-          'Accept': 'application/json',
-        }
-      }
+      { headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Referer': 'https://mitsuki-hub.ru/captures?tab=ratings',
+        'Origin': 'https://mitsuki-hub.ru',
+        'Accept': 'application/json',
+      }}
     );
     res.json(response.data);
-  } catch(e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// Страница статистики
+// Страницы статистики
 app.get('/stats', (req, res) => res.sendFile(path.join(__dirname, 'stats.html')));
+app.get('/stats/players', (req, res) => res.sendFile(path.join(__dirname, 'stats-players.html')));
+app.get('/stats/servers', (req, res) => res.sendFile(path.join(__dirname, 'stats-servers.html')));
 
 app.use((req, res) => res.status(404).send('404: ' + req.url));
 

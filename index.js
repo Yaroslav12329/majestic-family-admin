@@ -338,6 +338,43 @@ app.get('/panel/logs', (req, res) => res.sendFile(path.join(__dirname, 'logs.htm
 app.get('/panel/settings', (req, res) => res.sendFile(path.join(__dirname, 'settings.html')));
 app.get('/panel/applications', (req, res) => res.sendFile(path.join(__dirname, 'applications.html')));
 app.get('/apply', (req, res) => res.sendFile(path.join(__dirname, 'apply.html')));
+// ===== ДОБАВИТЬ В index.js перед строкой app.use(404) =====
+
+// Прокси для рейтинга игроков (mitsuki-hub.ru)
+app.get('/api/player-ratings', async (req, res) => {
+  const { serverId } = req.query;
+  if (!serverId) return res.status(400).json({ error: 'serverId required' });
+  try {
+    const response = await axios.get(
+      `https://mitsuki-hub.ru/api/ext-captures/player-ratings?serverId=${serverId}`,
+      {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': 'https://mitsuki-hub.ru/captures?tab=ratings',
+          'Origin': 'https://mitsuki-hub.ru',
+          'Accept': 'application/json',
+        }
+      }
+    );
+    res.json(response.data);
+  } catch(e) {
+    console.error('player-ratings error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Прокси для онлайна серверов (wiki.majestic-rp.ru)
+app.get('/api/servers-online', async (req, res) => {
+  try {
+    const response = await axios.get('https://wiki.majestic-rp.ru/api/online');
+    res.json(response.data);
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Страница статистики
+app.get('/panel/stats', (req, res) => res.sendFile(path.join(__dirname, 'stats.html')));
 
 app.use((req, res) => res.status(404).send('404: ' + req.url));
 

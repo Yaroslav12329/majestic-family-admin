@@ -298,7 +298,7 @@ app.post('/api/applications/:id/call', requireAuth, async (req, res) => {
   }
 });
 // Когда люди заходят на бэкенд напрямую, отдаем им обёртку (теперь это index.html)
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'home.html')));
 app.get('/api/stream', async (req, res) => {
   const streamers = ['dezlichh', 'dionispanika', 'antisocccia', 'winstonpnk', 'uglypnk', 'sudarpnk'];
   try {
